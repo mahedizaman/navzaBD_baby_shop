@@ -2,23 +2,21 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getBanners,
-  getBannerById,
-  createBanner,
-  updateBanner,
-  deleteBanner,
-} = require("../controllers/bannerController.js");
+  getBrands,
+  getBrandById,
+  createBrand,
+  updateBrand,
+  deleteBrand,
+} = require("../controllers/brandController");
 
-const { protect, admin } = require("../middleware/authMiddleware.js");
+const { protect, admin } = require("../middleware/authMiddleware");
 
-
-router.route("/").get(getBanners).post(protect, admin, createBanner);
-
+router.route("/").get(getBrands).post(protect, admin, createBrand);
 
 router
   .route("/:id")
-  .get(protect, getBannerById)
-  .put(protect, admin, updateBanner)
-  .delete(protect, admin, deleteBanner);
+  .get(getBrandById)
+  .put(protect, admin, updateBrand)
+  .delete(protect, admin, deleteBrand);
 
 module.exports = router;

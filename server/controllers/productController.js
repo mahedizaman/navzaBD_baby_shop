@@ -1,94 +1,237 @@
-const Product = require("../models/productModel");
 
-exports.getProducts = async (req, res, next) => {
-  try {
-    const products = await Product.find({});
-    res.status(200).json(products);
-  } catch (error) {
-    next(error);
+const Product = require("../models/productModel.js");
+const cloudinary = require("../config/cloudinary.js");
+
+// @desc    Get all products with pagination, sorting, and filtering
+// @route   GET /api/products
+// @access  Public
+const getProducts = async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    sortOrder = "asc",
+    category,
+    brand,
+    priceMin,
+    priceMax,
+    search,
+  } = req.query;
+
+  // Validate page and limit
+  const pageNumber = parseInt(page);
+  const limitNumber = parseInt(limit);
+  if (pageNumber < 1 || limitNumber < 1) {
+    res.status(400);
+    throw new Error("Page and limit must be positive integers");
   }
-};
 
-exports.getProductById = async (req, res, next) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-      res.status(200).json(product);
-    } else {
-      res.status(404);
-      throw new Error("Product not found");
+  // Validate sortOrder
+  if (!["asc", "desc"].includes(sortOrder)) {
+    res.status(400);
+    throw new Error('Sort order must be "asc" or "desc"');
+  }
+
+  // Build query
+  const query = {};
+  if (category) query.category = category;
+  if (brand) query.brand = brand;
+  if (priceMin || priceMax) {
+    query.price = {};
+    if (priceMin) query.price.$gte = Number(priceMin);
+    if (priceMax) {
+      query.price.$lte =
+        Number(priceMax) === Infinity
+          ? Number.MAX_SAFE_INTEGER
+          : Number(priceMax);
     }
-  } catch (error) {
-    next(error);
+  }
+
+  if (search) {
+    query.name = { $regex: search, $options: "i" }; // Case-insensitive search
+  }
+
+  // Pagination
+  const skip = (pageNumber - 1) * limitNumber;
+
+  // Fetch products and total count
+  const sortValue = sortOrder === "asc" ? 1 : -1;
+  const [products, total] = await Promise.all([
+    Product.find(query)
+      .populate("category", "name")
+      .populate("brand", "name")
+      .skip(skip)
+      .limit(limitNumber)
+      .sort({ createdAt: sortValue }),
+    Product.countDocuments(query),
+  ]);
+
+  res.json({
+    products,
+    total,
+  });
+};
+
+// @desc    Get product by ID
+// @route   GET /api/products/:id
+// @access  Private
+const getProductById = async (req, res) => {
+  const product = await Product.findById(req.params.id)
+    .populate("category", "name")
+    .populate("brand", "name");
+
+  if (product) {
+    res.json(product);
+  } else {
+    res.status(404);
+    throw new Error("Product not found");
   }
 };
 
-exports.createProduct = async (req, res, next) => {
-  try {
-    const product = new Product(req.body);
-    const createdProduct = await product.save();
-    res.status(201).json(createdProduct);
-  } catch (error) {
-    next(error);
+// @desc    Create a product
+// @route   POST /api/products
+// @access  Private/Admin
+const createProduct = async (req, res) => {
+  const {
+    name,
+    description,
+    price,
+    category,
+    brand,
+    image,
+    discountPercentage,
+    stock,
+  } = req.body;
+
+  const productExists = await Product.findOne({ name });
+  if (productExists) {
+    res.status(400);
+    throw new Error("Product with this name already exists");
+  }
+
+  // Upload image to Cloudinary
+  const result = await cloudinary.uploader.upload(image, {
+    folder: "admin-dashboard/products",
+  });
+
+  const product = await Product.create({
+    name,
+    description,
+    price,
+    category,
+    brand,
+    discountPercentage: discountPercentage || 0,
+    stock: stock || 0,
+    image: result.secure_url,
+  });
+
+  if (product) {
+    res.status(201).json(product);
+  } else {
+    res.status(400);
+    throw new Error("Invalid product data");
   }
 };
 
-exports.updateProduct = async (req, res, next) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-      Object.assign(product, req.body);
-      const updatedProduct = await product.save();
-      res.status(200).json(updatedProduct);
-    } else {
-      res.status(404);
-      throw new Error("Product not found");
+// @desc    Update a product
+// @route   PUT /api/products/:id
+// @access  Private/Admin
+const updateProduct = async (req, res) => {
+  const {
+    name,
+    description,
+    price,
+    category,
+    brand,
+    image,
+    discountPercentage,
+    stock,
+  } = req.body;
+
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    if (name !== product.name) {
+      const productExists = await Product.findOne({ name });
+      if (productExists) {
+        res.status(400);
+        throw new Error("Product with this name already exists");
+      }
     }
-  } catch (error) {
-    next(error);
+
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.price = price || product.price;
+    product.category = category || product.category;
+    product.brand = brand || product.brand;
+    product.discountPercentage =
+      discountPercentage || product.discountPercentage;
+    product.stock = stock || product.stock;
+
+    if (image && image !== product.image) {
+      const result = await cloudinary.uploader.upload(image, {
+        folder: "admin-dashboard/products",
+      });
+      product.image = result.secure_url;
+    }
+
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
+  } else {
+    res.status(404);
+    throw new Error("Product not found");
   }
 };
 
-exports.deleteProduct = async (req, res, next) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-      await product.deleteOne();
-      res.status(200).json({ message: "Product removed" });
+// @desc    Rate a product
+// @route   POST /api/products/:id/rate
+// @access  Private
+const rateProduct = async (req, res) => {
+  const { rating } = req.body;
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    const alreadyRated = product.ratings.find(
+      (r) => r.userId.toString() === req.user._id.toString(),
+    );
+
+    if (alreadyRated) {
+      alreadyRated.rating = rating;
     } else {
-      res.status(404);
-      throw new Error("Product not found");
+      product.ratings.push({
+        userId: req.user._id,
+        rating,
+      });
     }
-  } catch (error) {
-    next(error);
+
+    await product.save();
+    res.json(product);
+  } else {
+    res.status(404);
+    throw new Error("Product not found");
   }
 };
-exports.rateProduct = async (req, res, next) => {
-  try {
-    const { rating, comment } = req.body;
-    const product = await Product.findById(req.params.id);
 
-    if (product) {
-      const review = {
-        name: req.user.name,
-        rating: Number(rating),
-        comment,
-        user: req.user._id,
-      };
+// @desc    Delete a product
+// @route   DELETE /api/products/:id
+// @access  Private/Admin
+const deleteProduct = async (req, res) => {
+  const product = await Product.findById(req.params.id);
 
-      product.reviews.push(review);
-      product.numReviews = product.reviews.length;
-      product.rating =
-        product.reviews.reduce((acc, item) => item.rating + acc, 0) /
-        product.reviews.length;
-
-      await product.save();
-      res.status(201).json({ message: "Review added" });
-    } else {
-      res.status(404);
-      throw new Error("Product not found");
-    }
-  } catch (error) {
-    next(error);
+  if (product) {
+    await product.deleteOne();
+    res.json({ message: "Product removed" });
+  } else {
+    res.status(404);
+    throw new Error("Product not found");
   }
+};
+
+// Exporting using CommonJS syntax
+module.exports = {
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  rateProduct,
+  deleteProduct,
 };

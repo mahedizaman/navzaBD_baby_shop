@@ -19,12 +19,19 @@ const bannerRoutes = require("./routes/bannerRoutes");
 const paymentRoutes = require("./routes/paymentsRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const statsRoutes = require("./routes/statsRoutes");
+const { handleStripeWebhook } = require("./controllers/paymentController");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 
 // Database Connection
 connectDB();
+
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook,
+);
 
 // Middlewares
 // CORS setup for security

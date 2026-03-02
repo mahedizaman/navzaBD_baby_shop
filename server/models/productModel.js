@@ -53,9 +53,8 @@ productSchema.methods.calculateAverageRating = function () {
   return sum / this.ratings.length;
 };
 
-productSchema.pre("save", function (next) {
+productSchema.pre("save", function () {
   this.averageRating = this.calculateAverageRating();
-  next();
 });
 
 module.exports = mongoose.model("Product", productSchema);
