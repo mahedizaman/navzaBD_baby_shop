@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const {
   getBanners,
   getBannerById,
@@ -8,8 +7,47 @@ const {
   updateBanner,
   deleteBanner,
 } = require("../controllers/bannerController.js");
-
 const { protect, admin } = require("../middleware/authMiddleware.js");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Banners
+ *   description: Banner management API
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Banner:
+ *       type: object
+ *       required:
+ *         - name
+ *         - title
+ *         - startFrom
+ *         - image
+ *         - bannerType
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         title:
+ *           type: string
+ *         startFrom:
+ *           type: number
+ *         image:
+ *           type: string
+ *         bannerType:
+ *           type: string
+ *         isActive:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *         updatedAt:
+ *           type: string
+ */
 
 /**
  * @swagger
@@ -38,43 +76,36 @@ const { protect, admin } = require("../middleware/authMiddleware.js");
  *           schema:
  *             type: object
  *             required:
+ *               - name
  *               - title
+ *               - startFrom
  *               - image
+ *               - bannerType
  *             properties:
+ *               name:
+ *                 type: string
  *               title:
  *                 type: string
- *               subtitle:
- *                 type: string
+ *               startFrom:
+ *                 type: number
  *               image:
  *                 type: string
- *               buttonText:
- *                 type: string
- *               buttonLink:
+ *               bannerType:
  *                 type: string
  *               isActive:
  *                 type: boolean
- *                 default: true
  *     responses:
  *       201:
  *         description: Banner created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Banner'
- *       400:
- *         description: Validation error
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Admin access required
  */
+
 router.route("/").get(getBanners).post(protect, admin, createBanner);
 
 /**
  * @swagger
  * /api/banners/{id}:
  *   get:
- *     summary: Get banner by ID
+ *     summary: Get a banner by ID
  *     tags: [Banners]
  *     security:
  *       - bearerAuth: []
@@ -92,8 +123,6 @@ router.route("/").get(getBanners).post(protect, admin, createBanner);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Banner'
- *       401:
- *         description: Unauthorized
  *       404:
  *         description: Banner not found
  *   put:
@@ -115,31 +144,21 @@ router.route("/").get(getBanners).post(protect, admin, createBanner);
  *           schema:
  *             type: object
  *             properties:
+ *               name:
+ *                 type: string
  *               title:
  *                 type: string
- *               subtitle:
- *                 type: string
+ *               startFrom:
+ *                 type: number
  *               image:
  *                 type: string
- *               buttonText:
- *                 type: string
- *               buttonLink:
+ *               bannerType:
  *                 type: string
  *               isActive:
  *                 type: boolean
  *     responses:
  *       200:
  *         description: Banner updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Banner'
- *       400:
- *         description: Validation error
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Admin access required
  *       404:
  *         description: Banner not found
  *   delete:
@@ -157,13 +176,10 @@ router.route("/").get(getBanners).post(protect, admin, createBanner);
  *     responses:
  *       200:
  *         description: Banner deleted successfully
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Admin access required
  *       404:
  *         description: Banner not found
  */
+
 router
   .route("/:id")
   .get(protect, getBannerById)

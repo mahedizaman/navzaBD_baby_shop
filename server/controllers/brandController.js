@@ -24,8 +24,8 @@ exports.getBrandById = async (req, res, next) => {
 
 exports.createBrand = async (req, res, next) => {
   try {
-    const { name, description, image } = req.body;
-    const brand = new Brand({ name, description, image });
+    const { name, title, image } = req.body;
+    const brand = new Brand({ name, title, image });
     const createdBrand = await brand.save();
     res.status(201).json(createdBrand);
   } catch (error) {
@@ -38,7 +38,7 @@ exports.updateBrand = async (req, res, next) => {
     const brand = await Brand.findById(req.params.id);
     if (brand) {
       brand.name = req.body.name || brand.name;
-      brand.description = req.body.description || brand.description;
+      brand.title = req.body.title || brand.title;
       brand.image = req.body.image || brand.image;
       const updatedBrand = await brand.save();
       res.status(200).json(updatedBrand);

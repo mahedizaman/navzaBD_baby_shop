@@ -73,20 +73,27 @@ exports.getOrderById = async (req, res, next) => {
 exports.updateOrderStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
+
     const order = await Order.findById(req.params.id);
 
-    if (order) {
-      order.status = status || order.status;
-      if (status === "Delivered") {
-        order.isDelivered = true;
-        order.deliveredAt = Date.now();
-      }
-      const updatedOrder = await order.save();
-      res.status(200).json(updatedOrder);
-    } else {
+    if (!order) {
       res.status(404);
       throw new Error("Order not found");
     }
+
+    order.status = status || order.status;
+
+    if (status === "Delivered") {
+      order.isDelivered = true;
+      order.deliveredAt = Date.now();
+    }
+
+    const updatedOrder = await order.save();
+
+    res.status(200).json({
+      success: true,
+      order: updatedOrder,
+    });
   } catch (error) {
     next(error);
   }

@@ -3,10 +3,14 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const http = require("http"); // <-- Node HTTP server
+const { Server } = require("socket.io"); // <-- Socket.io server
 const errorHandler = require("./middleware/errorMiddleware");
 const connectDB = require("./config/db");
 const spaces = require("./config/swagger");
 const swaggerUi = require("swagger-ui-express");
+
+// Routes
 const authRoutes = require("./routes/authRoutes");
 const userRouters = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -27,6 +31,33 @@ const PORT = process.env.PORT || 8000;
 // Database Connection
 connectDB();
 
+// HTTP server needed for socket.io
+const httpServer = http.createServer(app);
+
+// Socket.io setup
+const io = new Server(httpServer, {
+  cors: {
+    origin: [
+      "http://localhost:5173", // Admin panel
+      "http://localhost:3000", // Client
+    ],
+    credentials: true,
+  },
+});
+
+// Socket connection listener
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
+});
+
+// Make io accessible in controllers (e.g., to emit events)
+app.set("io", io);
+
+// Stripe webhook
 app.post(
   "/api/payments/webhook",
   express.raw({ type: "application/json" }),
@@ -34,29 +65,21 @@ app.post(
 );
 
 // Middlewares
-// CORS setup for security
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5173",
-  process.env.CLIENT_URL,
-].filter(Boolean);
-
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // admin
-      "http://localhost:3000", // client
-      "http://localhost:8000", // swagger
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "http://localhost:8000",
     ],
     credentials: true,
   }),
 );
 
-//To read Form Data and data limit
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-//Routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRouters);
 app.use("/api/products", productRoutes);
@@ -70,7 +93,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/stats", statsRoutes);
 
-//API Documentation
+// Swagger Docs
 app.use(
   "/api/docs",
   swaggerUi.serve,
@@ -80,12 +103,11 @@ app.use(
     customSiteTitle: "NavzaBD API Documentation",
   }),
 );
-// Home Routes
-app.get("/", (req, res) => {
-  res.send("API is running...");
-});
 
-// Health Check Endpoint (As you requested)
+// Home route
+app.get("/", (req, res) => res.send("API is running..."));
+
+// Health check
 app.get("/health", (req, res) => {
   res.json({
     status: "healthy",
@@ -95,10 +117,10 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Error Handler (Must be at the bottom)
+// Error handler (at the bottom)
 app.use(errorHandler);
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT} 🚀`);
+// Start HTTP server (not app.listen!)
+httpServer.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT} 🚀`);
 });
