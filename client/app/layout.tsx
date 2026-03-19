@@ -3,6 +3,7 @@ import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header/Header";
 import { cn } from "@/lib/utils";
+import Footer from "@/components/footer/Footer";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body className={`${geist.variable} font-sans antialiased`}>
         <Header />
         {children}
+        <Footer/>
       </body>
     </html>
   );
