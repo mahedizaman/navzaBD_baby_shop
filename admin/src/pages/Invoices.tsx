@@ -85,7 +85,7 @@ const Invoices = () => {
   ];
 
   // Status Badge Logic
-  const getStatusStyle = (status) => {
+  const getStatusStyle = (status: string) => {
     switch (status) {
       case "Paid":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";

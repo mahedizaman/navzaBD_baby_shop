@@ -8,9 +8,9 @@ const TopHeader = () => {
   return (
     <div className="w-full bg-[#1e1250] text-white/70 border-b border-white/8">
       {/* Main Row */}
-      <Container className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0 py-1.75 px-4 md:px-5">
+      <Container className="flex flex-col items-center justify-between gap-2 px-4 py-2 md:flex-row md:gap-0 md:px-5">
         {/* Left: Help Center Links */}
-        <div className="flex items-center">
+        <div className="flex flex-wrap items-center justify-center">
           {topHelpCenter?.map((item, i) => (
             <Link
               href={item?.href}
@@ -40,7 +40,7 @@ const TopHeader = () => {
         </p>
 
         {/* Right: Currency + Divider + Social */}
-        <div className="flex items-center gap-4 border-t md:border-t-0 border-white/6 pt-2 md:pt-0 w-full md:w-auto justify-center md:justify-end">
+        <div className="flex w-full items-center justify-center gap-4 border-t border-white/6 pt-2 md:w-auto md:justify-end md:border-t-0 md:pt-0">
           <SelectCurrency />
           <div className="hidden sm:block h-[14px] w-px bg-white/15" />
           <HeaderSocialLinks />

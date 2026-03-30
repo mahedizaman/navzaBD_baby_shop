@@ -6,17 +6,20 @@ exports.getStats = async (req, res, next) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalProducts = await Product.countDocuments();
-    const orders = await Order.find({ isPaid: true });
-    const totalRevenue = orders.reduce(
-      (acc, order) => acc + order.totalPrice,
+    const totalOrders = await Order.countDocuments();
+    const paidOrders = await Order.find({ status: "paid" });
+    const totalRevenue = paidOrders.reduce(
+      (acc, order) => acc + (order.total || 0),
       0,
     );
 
     res.status(200).json({
       totalUsers,
       totalProducts,
-      totalOrders: orders.length,
+      totalOrders,
       totalRevenue,
+      /** alias for dashboards that label this “sales” */
+      totalSales: totalRevenue,
     });
   } catch (error) {
     next(error);

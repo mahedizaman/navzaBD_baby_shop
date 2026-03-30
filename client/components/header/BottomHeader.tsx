@@ -11,7 +11,6 @@ import {
   Menu,
   X,
   Home,
-  LayoutGrid,
   Tag,
   Percent,
   Info,
@@ -25,7 +24,6 @@ import { useWishlistStore } from "@/store/useWishlistStore";
 const navLinks = [
   { title: "Home", href: "/", icon: Home },
   { title: "Products", href: "/products", icon: ShoppingBag },
-  { title: "Categories", href: "/categories", icon: LayoutGrid },
   { title: "Deals", href: "/deals", icon: Percent },
   { title: "About", href: "/about", icon: Info },
 ];
@@ -177,7 +175,7 @@ const MobileDrawer = ({
                         }`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg
                         ${isActive ? "bg-[#1e1250]" : "bg-gray-100"}`}
                       >
                         <Icon
@@ -233,7 +231,7 @@ const MobileDrawer = ({
                       className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-[14px] font-medium
                         text-gray-600 hover:text-[#1e1250] hover:bg-[#f4f3ff] transition-all"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100">
                         <Icon size={15} className="text-gray-500" />
                       </div>
                       {item.title}
@@ -254,7 +252,7 @@ const MobileDrawer = ({
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-[#f4f3ff] border border-[#eeedfe]">
                   <div
                     className="w-9 h-9 rounded-full bg-[#1e1250] flex items-center justify-center
-                    text-white text-[12px] font-semibold flex-shrink-0"
+                    text-white text-[12px] font-semibold shrink-0"
                   >
                     {getInitials(mockUser.name)}
                   </div>
@@ -266,7 +264,7 @@ const MobileDrawer = ({
                   </div>
                   <ChevronDown
                     size={14}
-                    className="text-gray-400 flex-shrink-0"
+                    className="shrink-0 text-gray-400"
                   />
                 </div>
               ) : (
@@ -320,7 +318,7 @@ const BottomHeader = () => {
               </motion.button>
 
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+              <Link href="/" className="flex shrink-0 items-center gap-2">
                 <span className="font-bold text-[20px] text-[#1e1250] tracking-tight">
                   nav<span className="text-[#7f77dd]">zaBD</span>
                 </span>
@@ -406,7 +404,7 @@ const BottomHeader = () => {
                 >
                   <div
                     className="w-[28px] h-[28px] md:w-[30px] md:h-[30px] rounded-full bg-[#1e1250] flex items-center justify-center
-                    text-white text-[10px] md:text-[11px] font-semibold tracking-wide flex-shrink-0"
+                    text-white text-[10px] md:text-[11px] font-semibold tracking-wide shrink-0"
                   >
                     {getInitials(mockUser.name)}
                   </div>

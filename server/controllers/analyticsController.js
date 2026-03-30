@@ -8,7 +8,10 @@ exports.getAnalyticsOverview = async (req, res, next) => {
     const totalProducts = await Product.countDocuments();
     const orders = await Order.find({});
     const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((acc, item) => acc + item.totalPrice, 0);
+    const totalRevenue = orders.reduce(
+      (acc, item) => acc + (item.total || 0),
+      0,
+    );
 
     res.status(200).json({
       totalUsers,
@@ -33,11 +36,16 @@ exports.getProductAnalytics = async (req, res, next) => {
 exports.getSalesAnalytics = async (req, res, next) => {
   try {
     const salesData = await Order.aggregate([
-      { $match: { isPaid: true } },
+      { $match: { status: "paid" } },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$paidAt" } },
-          totalSales: { $sum: "$totalPrice" },
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$shippingAddress.paidAt",
+            },
+          },
+          totalSales: { $sum: "$total" },
         },
       },
     ]);

@@ -26,6 +26,8 @@ export type Category = {
   name: string;
   description?: string;
   image?: string;
+  imgUrl?: string;
+  imageUrl?: string;
   categoryType?: string;
 };
 

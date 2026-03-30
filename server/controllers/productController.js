@@ -1,6 +1,19 @@
 const Product = require("../models/productModel.js");
 const cloudinary = require("../config/cloudinary.js");
 
+function uploadBufferToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "navzabd/products" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      },
+    );
+    stream.end(buffer);
+  });
+}
+
 // @desc    Get all products with pagination, sorting, and filtering
 const getProducts = async (req, res) => {
   const {
@@ -77,12 +90,55 @@ const getProductById = async (req, res) => {
   }
 };
 
-// @desc    Create a product (Single or Bulk)
+// @desc    Create a product (JSON single/bulk, or multipart/form-data with field "image")
 const createProduct = async (req, res) => {
   try {
-    const body = req.body;
-    const isBulk = Array.isArray(body);
-    const items = isBulk ? body : [body];
+    let items;
+
+    if (req.file) {
+      const category = req.body.categoryId || req.body.category;
+      const brand = req.body.brandId || req.body.brand;
+      if (!category || !brand) {
+        return res.status(400).json({
+          success: false,
+          message: "categoryId and brandId are required",
+        });
+      }
+      if (
+        !req.body.name ||
+        !req.body.description ||
+        req.body.price === undefined ||
+        req.body.price === ""
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "name, description, and price are required",
+        });
+      }
+
+      const uploaded = await uploadBufferToCloudinary(req.file.buffer);
+      items = [
+        {
+          name: String(req.body.name).trim(),
+          description: String(req.body.description),
+          price: Number(req.body.price),
+          discountPercentage: Number(req.body.discountPercentage ?? 0),
+          stock: Number(req.body.stock ?? 0),
+          category,
+          brand,
+          image: uploaded.secure_url,
+        },
+      ];
+    } else {
+      const body = req.body;
+      const isBulk = Array.isArray(body);
+      const parsed = isBulk ? body : [body];
+      items = parsed.map((item) => ({
+        ...item,
+        category: item.categoryId || item.category,
+        brand: item.brandId || item.brand,
+      }));
+    }
 
     if (items.length === 0) {
       return res
@@ -90,7 +146,6 @@ const createProduct = async (req, res) => {
         .json({ success: false, message: "Request body is empty" });
     }
 
-    // ১. ডুপ্লিকেট চেক (একই নামের প্রোডাক্ট আছে কি না)
     const names = items.map((item) => item.name);
     const existingProducts = await Product.find({ name: { $in: names } });
     if (existingProducts.length > 0) {
@@ -101,13 +156,15 @@ const createProduct = async (req, res) => {
       });
     }
 
-    // ২. ইমেজ প্রসেসিং এবং ডাটা প্রেপারেশন
     const productsToSave = await Promise.all(
       items.map(async (item) => {
         let finalImageUrl = item.image;
 
-        // যদি ইমেজটি URL না হয়, তবেই ক্লাউডিনারিতে আপলোড হবে
-        if (typeof item.image === "string" && !item.image.startsWith("http")) {
+        if (
+          typeof item.image === "string" &&
+          item.image.length > 0 &&
+          !item.image.startsWith("http")
+        ) {
           const result = await cloudinary.uploader.upload(item.image, {
             folder: "navzabd/products",
           });
@@ -115,15 +172,18 @@ const createProduct = async (req, res) => {
         }
 
         return {
-          ...item,
-          image: finalImageUrl,
+          name: item.name,
+          description: item.description,
+          price: item.price,
           discountPercentage: item.discountPercentage || 0,
           stock: item.stock || 0,
+          category: item.category,
+          brand: item.brand,
+          image: finalImageUrl,
         };
       }),
     );
 
-    // ৩. ডাটাবেজে সেভ করা
     const createdProducts = await Product.insertMany(productsToSave);
 
     res.status(201).json({
@@ -136,26 +196,25 @@ const createProduct = async (req, res) => {
   }
 };
 
-// @desc    Update a product
+// @desc    Update a product (JSON or multipart with optional "image" file)
 const updateProduct = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      price,
-      category,
-      brand,
-      image,
-      discountPercentage,
-      stock,
-    } = req.body;
     const product = await Product.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // নাম পরিবর্তন করলে ডুপ্লিকেট চেক
+    const body = req.body || {};
+    const name = body.name;
+    const description = body.description;
+    const price = body.price;
+    const category = body.categoryId || body.category;
+    const brand = body.brandId || body.brand;
+    const image = body.image;
+    const discountPercentage = body.discountPercentage;
+    const stock = body.stock;
+
     if (name && name !== product.name) {
       const exists = await Product.findOne({ name });
       if (exists)
@@ -163,19 +222,23 @@ const updateProduct = async (req, res) => {
       product.name = name;
     }
 
-    if (description) product.description = description;
-    if (price !== undefined) product.price = price;
+    if (description !== undefined && description !== "")
+      product.description = description;
+    if (price !== undefined && price !== "")
+      product.price = Number(price);
     if (category) product.category = category;
     if (brand) product.brand = brand;
-    if (discountPercentage !== undefined)
-      product.discountPercentage = discountPercentage;
-    if (stock !== undefined) product.stock = stock;
+    if (discountPercentage !== undefined && discountPercentage !== "")
+      product.discountPercentage = Number(discountPercentage);
+    if (stock !== undefined && stock !== "") product.stock = Number(stock);
 
-    // ইমেজ আপডেট লজিক
-    if (image && image !== product.image) {
+    if (req.file) {
+      const uploaded = await uploadBufferToCloudinary(req.file.buffer);
+      product.image = uploaded.secure_url;
+    } else if (image && image !== product.image) {
       if (typeof image === "string" && image.startsWith("http")) {
         product.image = image;
-      } else {
+      } else if (typeof image === "string" && image.length > 0) {
         const result = await cloudinary.uploader.upload(image, {
           folder: "navzabd/products",
         });
@@ -184,7 +247,10 @@ const updateProduct = async (req, res) => {
     }
 
     const updatedProduct = await product.save();
-    res.json(updatedProduct);
+    const populated = await Product.findById(updatedProduct._id)
+      .populate("category", "name")
+      .populate("brand", "name");
+    res.json(populated);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

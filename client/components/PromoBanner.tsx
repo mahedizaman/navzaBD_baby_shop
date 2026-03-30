@@ -42,7 +42,7 @@ export default function PromoBanner() {
         <div className="relative z-10 flex flex-col items-center gap-4">
           <div className="text-7xl select-none">🩲</div>
           <Link
-            href="/categories/diapers"
+            href="/products?search=diaper"
             className="px-8 py-3.5 bg-[#f97316] hover:bg-[#ea6c10] text-white font-bold rounded-full text-sm transition-all hover:scale-105 active:scale-95"
           >
             View Offer →

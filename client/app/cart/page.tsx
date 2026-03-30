@@ -191,13 +191,12 @@ export default function CartPage() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  disabled
-                  className="mt-4 w-full rounded-xl bg-gray-200 text-gray-500 py-3 text-sm font-semibold cursor-not-allowed"
+                <Link
+                  href="/checkout"
+                  className="mt-4 flex w-full items-center justify-center rounded-xl bg-[#1e1250] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#2d1f6e]"
                 >
                   Proceed to checkout
-                </button>
+                </Link>
               </div>
             </motion.div>
           </div>

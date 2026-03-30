@@ -14,7 +14,7 @@ const Users = () => {
     { id: 10, name: "Kamrul Islam", email: "kamrul@gmail.com", role: "User" },
   ]);
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number) => {
     const updatedUsers = users.filter((user) => user.id !== id);
     setUsers(updatedUsers);
   };

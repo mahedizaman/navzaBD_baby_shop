@@ -6,11 +6,12 @@ const {
   getOrderById,
   createOrderFromCart,
   updateOrderStatus,
+  updateOrderFulfillment,
   deleteOrder,
   getAllOrdersAdmin,
 } = require("../controllers/orderController.js");
 
-const { protect } = require("../middleware/authMiddleware.js");
+const { protect, admin } = require("../middleware/authMiddleware.js");
 /**
  * @swagger
  * /api/orders/admin:
@@ -33,7 +34,7 @@ const { protect } = require("../middleware/authMiddleware.js");
  *       403:
  *         description: Admin access required
  */
-router.route("/admin").get(protect, getAllOrdersAdmin);
+router.route("/admin").get(protect, admin, getAllOrdersAdmin);
 
 /**
  * @swagger
@@ -187,6 +188,10 @@ router.route("/:id").get(protect, getOrderById).delete(protect, deleteOrder);
  *         description: Order not found
  */
 router.route("/:id/status").put(protect, updateOrderStatus);
+
+router
+  .route("/:id/fulfillment")
+  .put(protect, admin, updateOrderFulfillment);
 
 /**
  * @swagger

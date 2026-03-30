@@ -41,6 +41,12 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "paid", "completed", "cancelled"],
       default: "pending",
     },
+    /** Admin fulfillment: shipping workflow (separate from payment `status`). */
+    fulfillmentStatus: {
+      type: String,
+      enum: ["pending", "processing", "shipped", "delivered"],
+      default: "pending",
+    },
     shippingAddress: {
       street: {
         type: String,

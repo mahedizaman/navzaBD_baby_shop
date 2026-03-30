@@ -14,7 +14,7 @@ const Account = () => {
     { userId: 10, userName: "Kamrul Islam", userEmail: "kamrul@example.com" },
   ]);
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number) => {
     const updatedUsers = users.filter((user) => user.userId !== id);
     setUsers(updatedUsers);
   };

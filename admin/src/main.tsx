@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 import "./index.css";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -13,27 +13,37 @@ import Order from "./pages/Order";
 import Invoices from "./pages/Invoices";
 import Product from "./pages/Product";
 import Categories from "./pages/Categories";
+import { RequireAdmin } from "./components/RequireAdmin";
+import { Toaster } from "sonner";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
   {
     path: "/",
-    element: <App />,
+    element: (
+      <RequireAdmin>
+        <App />
+      </RequireAdmin>
+    ),
     children: [
-      { index: true, path: "/dashboard", element: <Dashboard /> },
-      { path: "/dashboard/account", element: <Account /> },
-      { path: "/dashboard/users", element: <Users /> },
-      { path: "/dashboard/banner", element: <Banner /> },
-      { path: "/dashboard/brand", element: <Brand /> },
-      { path: "/dashboard/order", element: <Order /> },
-      { path: "/dashboard/invoices", element: <Invoices /> },
-      { path: "/dashboard/product", element: <Product /> },
-      { path: "/dashboard/categories", element: <Categories /> },
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "dashboard/account", element: <Account /> },
+      { path: "dashboard/users", element: <Users /> },
+      { path: "dashboard/banner", element: <Banner /> },
+      { path: "dashboard/brand", element: <Brand /> },
+      { path: "dashboard/order", element: <Order /> },
+      { path: "dashboard/invoices", element: <Invoices /> },
+      { path: "dashboard/product", element: <Product /> },
+      { path: "dashboard/categories", element: <Categories /> },
     ],
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <RouterProvider router={router} />,
+  <>
+    <Toaster richColors position="top-right" />
+    <RouterProvider router={router} />
+  </>,
 );

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { protect, admin } = require("../middleware/authMiddleware");
+const { optionalSingle } = require("../middleware/uploadMiddleware");
 
 const {
   createProduct,
@@ -157,7 +158,9 @@ router.route("/").get(getProducts);
  *       403:
  *         description: Admin access required
  */
-router.route("/").post(protect, admin, createProduct);
+router
+  .route("/")
+  .post(protect, admin, optionalSingle("image"), createProduct);
 
 /**
  * @swagger
@@ -201,7 +204,9 @@ router.route("/:id").get(getProductById);
  *       403:
  *         description: Admin access required
  */
-router.route("/:id").put(protect, admin, updateProduct);
+router
+  .route("/:id")
+  .put(protect, admin, optionalSingle("image"), updateProduct);
 
 /**
  * @swagger

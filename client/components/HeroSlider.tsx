@@ -36,7 +36,7 @@ const slides = [
     title: "Baby Toys & Learning\nKits",
     offer: "Free Delivery on Orders ৳500+!",
     cta: "Explore the Collection",
-    href: "/categories",
+    href: "/products?search=toys",
     bg: "#f0fdf4",
     accent: "#22c55e",
     emoji: "🧸",

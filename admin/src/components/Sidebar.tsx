@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 import {
   ImageDown,
   ImageIcon,
@@ -13,11 +12,25 @@ import {
   UserCircle,
   Users2,
 } from "lucide-react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+import { toast } from "sonner";
+import { clearAdminSession } from "@/lib/auth";
 import { Button } from "./ui/button";
 
-const Sidebar = ({isOpen,setOpen}) => {
+type SidebarProps = {
+  isOpen: boolean;
+  setOpen: (open: boolean) => void;
+};
+
+const Sidebar = ({ isOpen, setOpen }: SidebarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  function logout() {
+    clearAdminSession();
+    toast.success("Logged out");
+    navigate("/login", { replace: true });
+  }
   const menuItems = [
     {
       name: "Dashboard",
@@ -147,7 +160,9 @@ const Sidebar = ({isOpen,setOpen}) => {
       </div>
       <div className="p-4 mt-auto border-t border-white/5">
         <Button
+          type="button"
           variant="destructive"
+          onClick={logout}
           className={cn(
             "flex items-center gap-3 transition-all duration-300 bg-red-600 text-white  hover:bg-red-800/99 hover:text-white border border-red-600/20",
             isOpen

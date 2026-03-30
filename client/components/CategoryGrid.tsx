@@ -78,7 +78,7 @@ function CategoryCard({ category }: { category: Category }) {
         >
           {/* Image / Emoji */}
           <div
-            className="relative w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0"
+            className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl md:h-16 md:w-16"
             style={{
               backgroundColor: hasImage ? "#fff" : config.border + "80",
             }}
@@ -89,7 +89,7 @@ function CategoryCard({ category }: { category: Category }) {
                 alt={category.name}
                 fill
                 sizes="(max-width: 768px) 56px, 64px"
-                className="object-contain p-1"
+                className="h-full w-full object-cover p-1"
                 onError={() => setImgError(true)}
               />
             ) : (
@@ -148,19 +148,19 @@ export default function CategoryGrid() {
   const tiles = useMemo(() => categories.slice(0, 7), [categories]);
 
   return (
-    <section className="py-14 px-4 max-w-6xl mx-auto">
+    <section className="mx-auto max-w-6xl px-4 py-10 md:py-14">
       {/* Header */}
-      <div className="text-center mb-10">
+      <div className="mb-8 text-center md:mb-10">
         <span className="text-xs font-semibold tracking-widest uppercase text-[#7f77dd]">
           Categories
         </span>
-        <h2 className="text-2xl md:text-3xl font-bold text-[#1a1a2e] mt-1">
+        <h2 className="mt-1 text-xl font-bold text-[#1a1a2e] md:text-3xl">
           What are you looking for?
         </h2>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 md:gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <CategoryCardSkeleton key={i} />
           ))}
@@ -169,7 +169,7 @@ export default function CategoryGrid() {
         <div className="text-center text-sm text-gray-400 py-8">{error}</div>
       ) : (
         <motion.div
-          className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4"
+          className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 md:gap-4"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"

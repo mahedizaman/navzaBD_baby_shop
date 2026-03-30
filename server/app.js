@@ -21,6 +21,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const bannerRoutes = require("./routes/bannerRoutes");
 const paymentRoutes = require("./routes/paymentsRoutes");
+const paymentInitRoutes = require("./routes/paymentRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 const { handleStripeWebhook } = require("./controllers/paymentController");
@@ -90,6 +91,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/payment", paymentInitRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/stats", statsRoutes);
 

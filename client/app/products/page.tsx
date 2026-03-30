@@ -56,7 +56,7 @@ export default async function ShopPage({
                 No products match your filters. Try adjusting search or filters.
               </p>
             ) : (
-              <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+              <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-6">
                 {products.map((p) => (
                   <li key={p._id}>
                     <ProductCard product={p} />

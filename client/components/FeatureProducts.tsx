@@ -275,12 +275,12 @@ export default function FeaturedProducts() {
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
     >
-      <div className="flex items-end justify-between mb-10">
+      <div className="mb-8 flex items-end justify-between gap-3 md:mb-10">
         <div>
           <span className="text-xs font-semibold tracking-widest uppercase text-[#7f77dd]">
             Featured
           </span>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#1a1a2e] mt-1">
+          <h2 className="mt-1 text-xl font-bold text-[#1a1a2e] md:text-3xl">
             Best-Selling Products
           </h2>
         </div>
@@ -293,7 +293,7 @@ export default function FeaturedProducts() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -301,7 +301,7 @@ export default function FeaturedProducts() {
       ) : error ? (
         <div className="text-center text-sm text-gray-500">{error}</div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-5">
           {cards.map((p) => (
             <ProductCard key={p._id} product={p} />
           ))}
