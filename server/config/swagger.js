@@ -54,11 +54,34 @@ const options = {
             name: { type: "string" },
             description: { type: "string" },
             price: { type: "number" },
+            discountPercentage: { type: "number" },
             stock: { type: "number" },
-            category: { type: "string" },
-            brand: { type: "string" },
-            images: { type: "array", items: { type: "string" } },
-            featured: { type: "boolean" },
+            category: {
+              oneOf: [
+                { type: "string" },
+                {
+                  type: "object",
+                  properties: {
+                    _id: { type: "string" },
+                    name: { type: "string" },
+                  },
+                },
+              ],
+            },
+            brand: {
+              oneOf: [
+                { type: "string" },
+                {
+                  type: "object",
+                  properties: {
+                    _id: { type: "string" },
+                    name: { type: "string" },
+                  },
+                },
+              ],
+            },
+            image: { type: "string" },
+            averageRating: { type: "number" },
             createdAt: { type: "string", format: "date-time" },
           },
         },
@@ -129,6 +152,7 @@ const options = {
             name: { type: "string" },
             description: { type: "string" },
             image: { type: "string" },
+            categoryType: { type: "string" },
             createdAt: { type: "string", format: "date-time" },
           },
         },
@@ -139,6 +163,7 @@ const options = {
             _id: { type: "string" },
             name: { type: "string" },
             description: { type: "string" },
+            title: { type: "string" },
             image: { type: "string" },
             createdAt: { type: "string", format: "date-time" },
           },

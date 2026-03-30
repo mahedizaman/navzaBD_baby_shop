@@ -1,10 +1,7 @@
-
 const Product = require("../models/productModel.js");
 const cloudinary = require("../config/cloudinary.js");
 
 // @desc    Get all products with pagination, sorting, and filtering
-// @route   GET /api/products
-// @access  Public
 const getProducts = async (req, res) => {
   const {
     page = 1,
@@ -17,21 +14,14 @@ const getProducts = async (req, res) => {
     search,
   } = req.query;
 
-  // Validate page and limit
   const pageNumber = parseInt(page);
   const limitNumber = parseInt(limit);
   if (pageNumber < 1 || limitNumber < 1) {
-    res.status(400);
-    throw new Error("Page and limit must be positive integers");
+    return res
+      .status(400)
+      .json({ message: "Page and limit must be positive integers" });
   }
 
-  // Validate sortOrder
-  if (!["asc", "desc"].includes(sortOrder)) {
-    res.status(400);
-    throw new Error('Sort order must be "asc" or "desc"');
-  }
-
-  // Build query
   const query = {};
   if (category) query.category = category;
   if (brand) query.brand = brand;
@@ -47,149 +37,167 @@ const getProducts = async (req, res) => {
   }
 
   if (search) {
-    query.name = { $regex: search, $options: "i" }; // Case-insensitive search
+    query.name = { $regex: search, $options: "i" };
   }
 
-  // Pagination
   const skip = (pageNumber - 1) * limitNumber;
-
-  // Fetch products and total count
   const sortValue = sortOrder === "asc" ? 1 : -1;
-  const [products, total] = await Promise.all([
-    Product.find(query)
-      .populate("category", "name")
-      .populate("brand", "name")
-      .skip(skip)
-      .limit(limitNumber)
-      .sort({ createdAt: sortValue }),
-    Product.countDocuments(query),
-  ]);
 
-  res.json({
-    products,
-    total,
-  });
+  try {
+    const [products, total] = await Promise.all([
+      Product.find(query)
+        .populate("category", "name")
+        .populate("brand", "name")
+        .skip(skip)
+        .limit(limitNumber)
+        .sort({ createdAt: sortValue }),
+      Product.countDocuments(query),
+    ]);
+
+    res.json({ products, total });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 // @desc    Get product by ID
-// @route   GET /api/products/:id
-// @access  Private
 const getProductById = async (req, res) => {
-  const product = await Product.findById(req.params.id)
-    .populate("category", "name")
-    .populate("brand", "name");
+  try {
+    const product = await Product.findById(req.params.id)
+      .populate("category", "name")
+      .populate("brand", "name");
 
-  if (product) {
-    res.json(product);
-  } else {
-    res.status(404);
-    throw new Error("Product not found");
+    if (product) {
+      res.json(product);
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Create a product
-// @route   POST /api/products
-// @access  Private/Admin
+// @desc    Create a product (Single or Bulk)
 const createProduct = async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    category,
-    brand,
-    image,
-    discountPercentage,
-    stock,
-  } = req.body;
+  try {
+    const body = req.body;
+    const isBulk = Array.isArray(body);
+    const items = isBulk ? body : [body];
 
-  const productExists = await Product.findOne({ name });
-  if (productExists) {
-    res.status(400);
-    throw new Error("Product with this name already exists");
-  }
+    if (items.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Request body is empty" });
+    }
 
-  // Upload image to Cloudinary
-  const result = await cloudinary.uploader.upload(image, {
-    folder: "admin-dashboard/products",
-  });
+    // ১. ডুপ্লিকেট চেক (একই নামের প্রোডাক্ট আছে কি না)
+    const names = items.map((item) => item.name);
+    const existingProducts = await Product.find({ name: { $in: names } });
+    if (existingProducts.length > 0) {
+      const existingNames = existingProducts.map((p) => p.name);
+      return res.status(400).json({
+        success: false,
+        message: `Products already exist: ${existingNames.join(", ")}`,
+      });
+    }
 
-  const product = await Product.create({
-    name,
-    description,
-    price,
-    category,
-    brand,
-    discountPercentage: discountPercentage || 0,
-    stock: stock || 0,
-    image: result.secure_url,
-  });
+    // ২. ইমেজ প্রসেসিং এবং ডাটা প্রেপারেশন
+    const productsToSave = await Promise.all(
+      items.map(async (item) => {
+        let finalImageUrl = item.image;
 
-  if (product) {
-    res.status(201).json(product);
-  } else {
-    res.status(400);
-    throw new Error("Invalid product data");
+        // যদি ইমেজটি URL না হয়, তবেই ক্লাউডিনারিতে আপলোড হবে
+        if (typeof item.image === "string" && !item.image.startsWith("http")) {
+          const result = await cloudinary.uploader.upload(item.image, {
+            folder: "navzabd/products",
+          });
+          finalImageUrl = result.secure_url;
+        }
+
+        return {
+          ...item,
+          image: finalImageUrl,
+          discountPercentage: item.discountPercentage || 0,
+          stock: item.stock || 0,
+        };
+      }),
+    );
+
+    // ৩. ডাটাবেজে সেভ করা
+    const createdProducts = await Product.insertMany(productsToSave);
+
+    res.status(201).json({
+      success: true,
+      count: createdProducts.length,
+      data: createdProducts,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
 // @desc    Update a product
-// @route   PUT /api/products/:id
-// @access  Private/Admin
 const updateProduct = async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    category,
-    brand,
-    image,
-    discountPercentage,
-    stock,
-  } = req.body;
+  try {
+    const {
+      name,
+      description,
+      price,
+      category,
+      brand,
+      image,
+      discountPercentage,
+      stock,
+    } = req.body;
+    const product = await Product.findById(req.params.id);
 
-  const product = await Product.findById(req.params.id);
-
-  if (product) {
-    if (name !== product.name) {
-      const productExists = await Product.findOne({ name });
-      if (productExists) {
-        res.status(400);
-        throw new Error("Product with this name already exists");
-      }
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    product.name = name || product.name;
-    product.description = description || product.description;
-    product.price = price || product.price;
-    product.category = category || product.category;
-    product.brand = brand || product.brand;
-    product.discountPercentage =
-      discountPercentage || product.discountPercentage;
-    product.stock = stock || product.stock;
+    // নাম পরিবর্তন করলে ডুপ্লিকেট চেক
+    if (name && name !== product.name) {
+      const exists = await Product.findOne({ name });
+      if (exists)
+        return res.status(400).json({ message: "Product name already exists" });
+      product.name = name;
+    }
 
+    if (description) product.description = description;
+    if (price !== undefined) product.price = price;
+    if (category) product.category = category;
+    if (brand) product.brand = brand;
+    if (discountPercentage !== undefined)
+      product.discountPercentage = discountPercentage;
+    if (stock !== undefined) product.stock = stock;
+
+    // ইমেজ আপডেট লজিক
     if (image && image !== product.image) {
-      const result = await cloudinary.uploader.upload(image, {
-        folder: "admin-dashboard/products",
-      });
-      product.image = result.secure_url;
+      if (typeof image === "string" && image.startsWith("http")) {
+        product.image = image;
+      } else {
+        const result = await cloudinary.uploader.upload(image, {
+          folder: "navzabd/products",
+        });
+        product.image = result.secure_url;
+      }
     }
 
     const updatedProduct = await product.save();
     res.json(updatedProduct);
-  } else {
-    res.status(404);
-    throw new Error("Product not found");
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
 
 // @desc    Rate a product
-// @route   POST /api/products/:id/rate
-// @access  Private
 const rateProduct = async (req, res) => {
-  const { rating } = req.body;
-  const product = await Product.findById(req.params.id);
+  try {
+    const { rating } = req.body;
+    const product = await Product.findById(req.params.id);
 
-  if (product) {
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
     const alreadyRated = product.ratings.find(
       (r) => r.userId.toString() === req.user._id.toString(),
     );
@@ -197,36 +205,31 @@ const rateProduct = async (req, res) => {
     if (alreadyRated) {
       alreadyRated.rating = rating;
     } else {
-      product.ratings.push({
-        userId: req.user._id,
-        rating,
-      });
+      product.ratings.push({ userId: req.user._id, rating });
     }
 
     await product.save();
     res.json(product);
-  } else {
-    res.status(404);
-    throw new Error("Product not found");
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
 
 // @desc    Delete a product
-// @route   DELETE /api/products/:id
-// @access  Private/Admin
 const deleteProduct = async (req, res) => {
-  const product = await Product.findById(req.params.id);
-
-  if (product) {
-    await product.deleteOne();
-    res.json({ message: "Product removed" });
-  } else {
-    res.status(404);
-    throw new Error("Product not found");
+  try {
+    const product = await Product.findById(req.params.id);
+    if (product) {
+      await product.deleteOne();
+      res.json({ message: "Product removed" });
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Exporting using CommonJS syntax
 module.exports = {
   getProducts,
   getProductById,

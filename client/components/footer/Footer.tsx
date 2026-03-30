@@ -26,7 +26,7 @@ const Footer = () => {
         </div>
 
         <div className="text-gray-500 text-xs text-center md:text-left">
-          Made with ❤️ using React and Tailwind CSS.
+          Made for Scan-IT using Next js and Tailwind CSS.
         </div>
       </Container>
     </footer>

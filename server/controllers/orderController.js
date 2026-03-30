@@ -1,4 +1,5 @@
 const Order = require("../models/orderModel");
+const Product = require("../models/productModel.js");
 
 exports.getAllOrdersAdmin = async (req, res, next) => {
   try {
@@ -22,6 +23,7 @@ exports.createOrderFromCart = async (req, res, next) => {
   try {
     const {
       orderItems,
+      items,
       shippingAddress,
       paymentMethod,
       itemsPrice,
@@ -30,14 +32,41 @@ exports.createOrderFromCart = async (req, res, next) => {
       totalPrice,
     } = req.body;
 
-    if (orderItems && orderItems.length === 0) {
+    const lineItems = Array.isArray(orderItems)
+      ? orderItems
+      : Array.isArray(items)
+        ? items
+        : [];
+
+    if (lineItems.length === 0) {
       res.status(400);
       throw new Error("No order items");
     }
 
+    // Validate and reserve stock (basic non-transactional approach)
+    for (const li of lineItems) {
+      const pid = li.productId || li.product || li._id;
+      const qty = Math.floor(Number(li.quantity || li.qty || 0));
+      if (!pid || !Number.isFinite(qty) || qty < 1) {
+        res.status(400);
+        throw new Error("Invalid order items");
+      }
+
+      const product = await Product.findById(pid).select("stock");
+      if (!product) {
+        res.status(400);
+        throw new Error("Invalid order items");
+      }
+
+      if (qty > product.stock) {
+        res.status(400);
+        throw new Error(`Sorry, only ${product.stock} items available in stock`);
+      }
+    }
+
     const order = new Order({
       user: req.user._id,
-      orderItems,
+      orderItems: lineItems,
       shippingAddress,
       paymentMethod,
       itemsPrice,
@@ -47,6 +76,20 @@ exports.createOrderFromCart = async (req, res, next) => {
     });
 
     const createdOrder = await order.save();
+
+    // Decrement stock for each purchased item
+    await Promise.all(
+      lineItems.map(async (li) => {
+        const pid = li.productId || li.product || li._id;
+        const qty = Math.floor(Number(li.quantity || li.qty || 0));
+        const product = await Product.findById(pid);
+        if (!product) return;
+        product.stock = Math.max(0, product.stock - qty);
+        // status auto-updated in productModel pre-save
+        await product.save();
+      }),
+    );
+
     res.status(201).json(createdOrder);
   } catch (error) {
     next(error);

@@ -37,25 +37,78 @@ const { protect, admin } = require("../middleware/authMiddleware.js");
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               image:
- *                 type: string
+ *             oneOf:
+ *               - type: object
+ *                 required:
+ *                   - name
+ *                   - categoryType
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     example: Diapers
+ *                   description:
+ *                     type: string
+ *                     example: Premium diaper products
+ *                   image:
+ *                     type: string
+ *                     example: https://example.com/diapers.jpg
+ *                   categoryType:
+ *                     type: string
+ *                     enum: [Featured, "Hot Categories", "Top Categories"]
+ *                     example: Featured
+ *               - type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - name
+ *                     - categoryType
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                     image:
+ *                       type: string
+ *                     categoryType:
+ *                       type: string
+ *                       enum: [Featured, "Hot Categories", "Top Categories"]
+ *           examples:
+ *             singleCategory:
+ *               summary: Single category
+ *               value:
+ *                 name: Diapers
+ *                 description: Premium diaper products
+ *                 image: https://example.com/diapers.jpg
+ *                 categoryType: Featured
+ *             bulkCategories:
+ *               summary: Bulk categories
+ *               value:
+ *                 - name: Feeding
+ *                   description: Baby feeding products
+ *                   image: https://example.com/feeding.jpg
+ *                   categoryType: Hot Categories
+ *                 - name: Toys
+ *                   description: Baby toys & learning kits
+ *                   image: https://example.com/toys.jpg
+ *                   categoryType: Top Categories
  *     responses:
  *       201:
  *         description: Category created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Category'
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/Category'
+ *                 - type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Category'
  *       400:
  *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: Unauthorized
  *       403:
@@ -153,7 +206,7 @@ router.route("/").get(getCategories).post(protect, admin, createCategory);
  */
 router
   .route("/:id")
-  .get(protect, getCategoryById)
+  .get(getCategoryById)
   .put(protect, admin, updateCategory)
   .delete(protect, admin, deleteCategory);
 

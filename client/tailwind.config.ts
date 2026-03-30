@@ -7,6 +7,13 @@ const config: Config = {
     "./pages/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
   ],
+  theme: {
+    extend: {
+      fontFamily: {
+        syne: ["var(--font-syne)", "sans-serif"],
+      },
+    },
+  },
 };
 
 export default config;

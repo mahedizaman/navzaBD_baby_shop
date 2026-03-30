@@ -24,10 +24,51 @@ exports.getBrandById = async (req, res, next) => {
 
 exports.createBrand = async (req, res, next) => {
   try {
-    const { name, title, image } = req.body;
-    const brand = new Brand({ name, title, image });
-    const createdBrand = await brand.save();
-    res.status(201).json(createdBrand);
+    const body = req.body;
+    const isBulk = Array.isArray(body);
+    const items = isBulk ? body : [body];
+
+    if (items.length === 0) {
+      res.status(400);
+      throw new Error("Request body must not be empty");
+    }
+
+    const normalized = items.map((item, index) => {
+      if (!item || typeof item !== "object") {
+        res.status(400);
+        throw new Error(`Invalid brand payload at index ${index}`);
+      }
+
+      const { name, title, description, image } = item;
+
+      const finalDescription = description ?? title ?? "";
+      if (!name) {
+        res.status(400);
+        throw new Error(`Missing "name" at index ${index}`);
+      }
+
+      return {
+        name,
+        description: finalDescription,
+        image: image ?? "",
+      };
+    });
+
+    const names = normalized.map((b) => b.name);
+    const existing = await Brand.find({ name: { $in: names } }).select("name");
+    if (existing.length > 0) {
+      const existingNames = existing.map((b) => b.name);
+      res.status(400);
+      throw new Error(`Brand with these names already exists: ${existingNames.join(", ")}`);
+    }
+
+    if (isBulk) {
+      const brands = await Brand.insertMany(normalized);
+      return res.status(201).json(brands);
+    }
+
+    const createdBrand = await Brand.create(normalized[0]);
+    return res.status(201).json(createdBrand);
   } catch (error) {
     next(error);
   }

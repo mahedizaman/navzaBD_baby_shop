@@ -24,10 +24,56 @@ exports.getCategoryById = async (req, res, next) => {
 
 exports.createCategory = async (req, res, next) => {
   try {
-    const { name, description, image,categoryType } = req.body;
-    const category = new Category({ name, description, image,categoryType });
-    const createdCategory = await category.save();
-    res.status(201).json(createdCategory);
+    const body = req.body;
+    const isBulk = Array.isArray(body);
+    const items = isBulk ? body : [body];
+
+    if (items.length === 0) {
+      res.status(400);
+      throw new Error("Request body must not be empty");
+    }
+
+    const normalized = items.map((item, index) => {
+      if (!item || typeof item !== "object") {
+        res.status(400);
+        throw new Error(`Invalid category payload at index ${index}`);
+      }
+
+      const { name, description, image, categoryType } = item;
+      if (!name) {
+        res.status(400);
+        throw new Error(`Missing "name" at index ${index}`);
+      }
+      if (!categoryType) {
+        res.status(400);
+        throw new Error(`Missing "categoryType" at index ${index}`);
+      }
+
+      return {
+        name,
+        description,
+        image,
+        categoryType,
+      };
+    });
+
+    const names = normalized.map((c) => c.name);
+    const existing = await Category.find({ name: { $in: names } }).select("name");
+    if (existing.length > 0) {
+      const existingNames = existing.map((c) => c.name);
+      res.status(400);
+      throw new Error(
+        `Category with these names already exists: ${existingNames.join(", ")}`,
+      );
+    }
+
+    if (isBulk) {
+      const categories = await Category.insertMany(normalized);
+      return res.status(201).json(categories);
+    }
+
+    const createdCategory = await Category.create(normalized[0]);
+    return res.status(201).json(createdCategory);
   } catch (error) {
     next(error);
   }

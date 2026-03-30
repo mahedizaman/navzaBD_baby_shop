@@ -4,8 +4,12 @@ import "./globals.css";
 import Header from "@/components/header/Header";
 import { cn } from "@/lib/utils";
 import Footer from "@/components/footer/Footer";
+import { Syne, DM_Sans } from "next/font/google";
+import { ToastHost } from "@/components/common/ToastHost";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "NavzaBD Baby Shop",
@@ -20,9 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className={`${geist.variable} font-sans antialiased`}>
-        <Header />
-        {children}
-        <Footer/>
+        <ToastHost>
+          <Header />
+          {children}
+          <Footer />
+        </ToastHost>
       </body>
     </html>
   );

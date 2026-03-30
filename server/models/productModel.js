@@ -7,6 +7,11 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true, default: 0 },
     discountPercentage: { type: Number, default: 0, min: 0, max: 80 },
     stock: { type: Number, required: true, default: 0 },
+    status: {
+      type: String,
+      enum: ["active", "out_of_stock"],
+      default: "active",
+    },
 
     ratings: [
       {
@@ -55,6 +60,9 @@ productSchema.methods.calculateAverageRating = function () {
 
 productSchema.pre("save", function () {
   this.averageRating = this.calculateAverageRating();
+  if (typeof this.stock === "number") {
+    this.status = this.stock <= 0 ? "out_of_stock" : "active";
+  }
 });
 
 module.exports = mongoose.model("Product", productSchema);
