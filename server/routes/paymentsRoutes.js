@@ -2,10 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { protect } = require("../middleware/authMiddleware.js");
-const {
-  createPaymentIntent,
-  handleStripeWebhook,
-} = require("../controllers/paymentController.js");
+const { createPaymentIntent } = require("../controllers/paymentController.js");
 
 
 /**
@@ -72,26 +69,5 @@ const {
  *         description: Server error
  */
 router.post("/create-intent", protect, createPaymentIntent);
-
-/**
- * @swagger
- * /api/payments/webhook:
- *   post:
- *     summary: Handle Stripe webhook events
- *     tags: [Payments]
- *     description: Webhook endpoint for Stripe to notify about payment events
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *     responses:
- *       200:
- *         description: Webhook processed successfully
- *       400:
- *         description: Webhook signature verification failed
- */
-router.post("/webhook", handleStripeWebhook);
 
 module.exports = router;
