@@ -1,8 +1,20 @@
 const User = require("../models/userModel");
 
-// Admin registration (creates a User with role=admin)
+function getCreateAdminSecret(req) {
+  const headerSecret = req.headers["x-admin-secret"];
+  const bodySecret = req.body?.secret;
+  return headerSecret || bodySecret;
+}
+
+// Secret-protected admin creation (never exposed via public forms)
 exports.adminRegister = async (req, res) => {
   try {
+    const secret = getCreateAdminSecret(req);
+    const expected = process.env.ADMIN_CREATE_SECRET;
+    if (!expected || String(secret || "") !== String(expected)) {
+      return res.status(403).json({ message: "Permission denied" });
+    }
+
     const { name, email, password } = req.body || {};
 
     if (!name || !email || !password) {

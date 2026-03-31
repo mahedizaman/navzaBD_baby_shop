@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { getAdminUser, isAdminUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 type Address = {
@@ -26,6 +27,7 @@ type Profile = {
 };
 
 const Account = () => {
+  const isAdmin = isAdminUser(getAdminUser());
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -90,6 +92,10 @@ const Account = () => {
 
   async function handleProfileUpdate(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!profile) return;
     const cleanName = editProfile.name.trim();
     const cleanEmail = editProfile.email.trim();
@@ -150,6 +156,10 @@ const Account = () => {
 
   async function submitAddress(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!profile || !addressModal) return;
     if (!addressValid) {
       toast.error("All address fields are required.");
@@ -190,6 +200,10 @@ const Account = () => {
 
   async function handleDeleteAddress(id: string) {
     if (!profile) return;
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!window.confirm("Delete this address?")) return;
     setSaving(true);
     try {
@@ -242,6 +256,7 @@ const Account = () => {
                   onChange={(e) =>
                     setEditProfile((p) => ({ ...p, name: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -254,6 +269,7 @@ const Account = () => {
                   onChange={(e) =>
                     setEditProfile((p) => ({ ...p, email: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
             </div>
@@ -268,6 +284,7 @@ const Account = () => {
                   setEditProfile((p) => ({ ...p, avatar: e.target.value }))
                 }
                 placeholder="https://..."
+                disabled={!isAdmin || saving}
               />
               {editProfile.avatar.trim() ? (
                 <img
@@ -287,7 +304,7 @@ const Account = () => {
               <Button
                 type="submit"
                 className="bg-indigo-600"
-                disabled={saving}
+                disabled={!isAdmin || saving}
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save profile"}
               </Button>
@@ -308,6 +325,7 @@ const Account = () => {
               variant="outline"
               onClick={openAddAddress}
               className="gap-2"
+              disabled={!isAdmin || saving}
             >
               <Plus className="h-4 w-4" />
               Add
@@ -344,7 +362,7 @@ const Account = () => {
                         type="button"
                         className="inline-flex items-center gap-1 text-indigo-600 hover:underline"
                         onClick={() => openEditAddress(a)}
-                        disabled={saving}
+                        disabled={!isAdmin || saving}
                       >
                         <Pencil className="h-4 w-4" />
                         Edit
@@ -353,7 +371,7 @@ const Account = () => {
                         type="button"
                         className="inline-flex items-center gap-1 text-red-600 hover:underline"
                         onClick={() => void handleDeleteAddress(a._id)}
-                        disabled={saving}
+                        disabled={!isAdmin || saving}
                       >
                         {saving ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -390,6 +408,7 @@ const Account = () => {
                       street: e.target.value,
                     }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -401,6 +420,7 @@ const Account = () => {
                     onChange={(e) =>
                       setAddressForm((p) => ({ ...p, city: e.target.value }))
                     }
+                    disabled={!isAdmin || saving}
                   />
                 </div>
                 <div>
@@ -414,6 +434,7 @@ const Account = () => {
                         country: e.target.value,
                       }))
                     }
+                    disabled={!isAdmin || saving}
                   />
                 </div>
               </div>
@@ -428,6 +449,7 @@ const Account = () => {
                       postalCode: e.target.value,
                     }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div className="flex items-center gap-3">
@@ -440,6 +462,7 @@ const Account = () => {
                       isDefault: e.target.checked,
                     }))
                   }
+                  disabled={!isAdmin || saving}
                 />
                 <span className="text-sm text-gray-700">Set as default</span>
               </div>
@@ -448,7 +471,7 @@ const Account = () => {
                 <Button
                   type="submit"
                   className="bg-indigo-600"
-                  disabled={!addressValid || saving}
+                  disabled={!isAdmin || !addressValid || saving}
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
                 </Button>

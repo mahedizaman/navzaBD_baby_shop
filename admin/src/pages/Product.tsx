@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Loader2, Pencil, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { getAdminUser, isAdminUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 type RefName = { _id: string; name: string };
@@ -30,6 +31,7 @@ function refLabel(ref: ProductRow["category"]): string {
 }
 
 const Product = () => {
+  const isAdmin = isAdminUser(getAdminUser());
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -120,6 +122,10 @@ const Product = () => {
 
   async function handleAddProduct(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!name.trim() || !description.trim()) {
       toast.error("Name and description are required.");
       return;
@@ -183,6 +189,10 @@ const Product = () => {
 
   async function handleUpdateProduct(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!editing) return;
     if (!editing.name.trim() || !editing.description?.trim()) {
       toast.error("Name and description are required.");
@@ -248,6 +258,10 @@ const Product = () => {
   }
 
   async function handleDelete(id: string) {
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!window.confirm("Delete this product permanently?")) return;
     setRowAction(id);
     try {
@@ -284,6 +298,7 @@ const Product = () => {
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={!isAdmin || saving}
             />
           </div>
           <div>
@@ -295,6 +310,7 @@ const Product = () => {
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
+              disabled={!isAdmin || saving}
             />
           </div>
           <div>
@@ -305,6 +321,7 @@ const Product = () => {
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
               value={stock}
               onChange={(e) => setStock(e.target.value)}
+              disabled={!isAdmin || saving}
             />
           </div>
           <div>
@@ -318,6 +335,7 @@ const Product = () => {
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
               value={discount}
               onChange={(e) => setDiscount(e.target.value)}
+              disabled={!isAdmin || saving}
             />
           </div>
           <div>
@@ -326,6 +344,7 @@ const Product = () => {
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm bg-white"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
+              disabled={!isAdmin || saving}
             >
               <option value="">Select category</option>
               {categories
@@ -343,6 +362,7 @@ const Product = () => {
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm bg-white"
               value={brandId}
               onChange={(e) => setBrandId(e.target.value)}
+              disabled={!isAdmin || saving}
             >
               <option value="">Select brand</option>
               {brands
@@ -362,6 +382,7 @@ const Product = () => {
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm min-h-[80px]"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              disabled={!isAdmin || saving}
             />
           </div>
           <div>
@@ -373,6 +394,7 @@ const Product = () => {
               onChange={(e) =>
                 onSelectImage(e.target.files?.[0] ?? null)
               }
+              disabled={!isAdmin || saving}
             />
             {preview ? (
               <img
@@ -383,7 +405,11 @@ const Product = () => {
             ) : null}
           </div>
         </div>
-        <Button type="submit" className="mt-4 bg-indigo-600" disabled={saving}>
+        <Button
+          type="submit"
+          className="mt-4 bg-indigo-600"
+          disabled={!isAdmin || saving}
+        >
           {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -422,7 +448,7 @@ const Product = () => {
                       type="button"
                       className="inline-flex items-center gap-1 text-indigo-600 hover:underline"
                       onClick={() => openEdit(p)}
-                      disabled={rowAction === p._id}
+                      disabled={!isAdmin || rowAction === p._id}
                     >
                       {rowAction === p._id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -435,7 +461,7 @@ const Product = () => {
                       type="button"
                       className="inline-flex items-center gap-1 text-red-600 hover:underline"
                       onClick={() => void handleDelete(p._id)}
-                      disabled={rowAction === p._id}
+                      disabled={!isAdmin || rowAction === p._id}
                     >
                       <Trash2 className="h-4 w-4" />
                       Delete
@@ -463,6 +489,7 @@ const Product = () => {
                   onChange={(e) =>
                     setEditing({ ...editing, name: e.target.value })
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -473,6 +500,7 @@ const Product = () => {
                   onChange={(e) =>
                     setEditing({ ...editing, description: e.target.value })
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -488,6 +516,7 @@ const Product = () => {
                         price: Number(e.target.value),
                       })
                     }
+                    disabled={!isAdmin || saving}
                   />
                 </div>
                 <div>
@@ -502,6 +531,7 @@ const Product = () => {
                         stock: Number(e.target.value),
                       })
                     }
+                    disabled={!isAdmin || saving}
                   />
                 </div>
               </div>
@@ -516,6 +546,7 @@ const Product = () => {
                   onChange={(e) =>
                     onSelectEditImage(e.target.files?.[0] ?? null)
                   }
+                  disabled={!isAdmin || saving}
                 />
                 {editPreview ? (
                   <img
@@ -532,7 +563,11 @@ const Product = () => {
                 )}
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="bg-indigo-600" disabled={saving}>
+                <Button
+                  type="submit"
+                  className="bg-indigo-600"
+                  disabled={!isAdmin || saving}
+                >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (

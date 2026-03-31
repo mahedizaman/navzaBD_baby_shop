@@ -24,16 +24,12 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      const { data } = await axios.post<{
-        success?: boolean;
-        message?: string;
-      }>(`${baseURL}/api/admin/register`, {
+      await axios.post(`${baseURL}/api/auth/register`, {
         name: name.trim(),
         email: email.trim(),
         password,
       });
-
-      toast.success(data.message || "Admin account created.");
+      toast.success("Account created. You can sign in now.");
       navigate("/login", { replace: true });
     } catch (err) {
       const msg =
@@ -53,10 +49,10 @@ const Register = () => {
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900 px-4">
       <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md">
         <h1 className="text-2xl font-bold text-white">
-          NavzaBD <span className="text-indigo-400">Admin</span>
+          NavzaBD <span className="text-indigo-400">Panel</span>
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Create an admin account for the panel
+          Create an account (view-only unless you are an admin)
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
@@ -108,7 +104,7 @@ const Register = () => {
                 Creating…
               </>
             ) : (
-              "Create admin"
+              "Create account"
             )}
           </Button>
         </form>

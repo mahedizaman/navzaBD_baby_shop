@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Loader2, Pencil, Trash2 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { getAdminUser, isAdminUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 type CategoryType = "Featured" | "Hot Categories" | "Top Categories";
@@ -24,6 +25,7 @@ const CATEGORY_TYPES: CategoryType[] = [
 ];
 
 const Categories = () => {
+  const isAdmin = isAdminUser(getAdminUser());
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -104,6 +106,10 @@ const Categories = () => {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
 
     const cleanName = name.trim();
     const cleanDescription = description.trim();
@@ -151,6 +157,10 @@ const Categories = () => {
 
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!editing) return;
 
     const cleanName = editing.name.trim();
@@ -194,6 +204,10 @@ const Categories = () => {
   }
 
   async function handleDelete(id: string) {
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!window.confirm("Delete this category permanently?")) return;
     setRowAction(id);
     setSaving(true);
@@ -240,6 +254,7 @@ const Categories = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Diapers"
+              disabled={!isAdmin || saving}
             />
           </div>
 
@@ -253,6 +268,7 @@ const Categories = () => {
               onChange={(e) =>
                 setCategoryType(e.target.value as CategoryType)
               }
+              disabled={!isAdmin || saving}
             >
               {CATEGORY_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -271,6 +287,7 @@ const Categories = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short category description"
+              disabled={!isAdmin || saving}
             />
           </div>
 
@@ -285,6 +302,7 @@ const Categories = () => {
               onChange={(e) =>
                 onSelectImage(e.target.files?.[0] ?? null)
               }
+              disabled={!isAdmin || saving}
             />
             {preview ? (
               <img
@@ -298,7 +316,7 @@ const Categories = () => {
         <Button
           type="submit"
           className="mt-5 bg-indigo-600"
-          disabled={!canSaveAdd || saving}
+          disabled={!isAdmin || !canSaveAdd || saving}
         >
           {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -357,7 +375,7 @@ const Categories = () => {
                         type="button"
                         className="inline-flex items-center gap-1 text-indigo-600 hover:underline"
                         onClick={() => openEdit(c)}
-                        disabled={rowAction === c._id && saving}
+                        disabled={!isAdmin || (rowAction === c._id && saving)}
                       >
                         <Pencil className="h-4 w-4" />
                         Edit
@@ -366,7 +384,7 @@ const Categories = () => {
                         type="button"
                         className="inline-flex items-center gap-1 text-red-600 hover:underline"
                         onClick={() => void handleDelete(c._id)}
-                        disabled={rowAction === c._id && saving}
+                        disabled={!isAdmin || (rowAction === c._id && saving)}
                       >
                         {rowAction === c._id && saving ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -406,6 +424,7 @@ const Categories = () => {
                   onChange={(e) =>
                     setEditing({ ...editing, name: e.target.value })
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -418,6 +437,7 @@ const Categories = () => {
                   onChange={(e) =>
                     setEditing({ ...editing, description: e.target.value })
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -433,6 +453,7 @@ const Categories = () => {
                       categoryType: e.target.value as CategoryType,
                     })
                   }
+                  disabled={!isAdmin || saving}
                 >
                   {CATEGORY_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -452,6 +473,7 @@ const Categories = () => {
                   onChange={(e) =>
                     onSelectEditImage(e.target.files?.[0] ?? null)
                   }
+                  disabled={!isAdmin || saving}
                 />
                 {editPreview ? (
                   <img
@@ -471,7 +493,7 @@ const Categories = () => {
                 <Button
                   type="submit"
                   className="bg-indigo-600"
-                  disabled={saving}
+                  disabled={!isAdmin || saving}
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

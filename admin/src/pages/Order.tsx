@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { getAdminUser, isAdminUser } from "@/lib/auth";
 
 type UserRef = { _id: string; name?: string; email?: string };
 
@@ -51,6 +52,7 @@ function paymentLabel(status: string): string {
 }
 
 const Order = () => {
+  const isAdmin = isAdminUser(getAdminUser());
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [stats, setStats] = useState<{
     totalOrders: number;
@@ -89,6 +91,10 @@ const Order = () => {
   }, [load]);
 
   async function updateFulfillment(orderId: string, fulfillmentStatus: string) {
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     setUpdatingId(orderId);
     try {
       await api.put(`/api/orders/${orderId}/fulfillment`, {
@@ -224,7 +230,7 @@ const Order = () => {
                                 e.target.value,
                               )
                             }
-                            disabled={updatingId === order._id}
+                            disabled={!isAdmin || updatingId === order._id}
                           >
                             {FULFILLMENT_OPTIONS.map((opt) => (
                               <option key={opt.value} value={opt.value}>

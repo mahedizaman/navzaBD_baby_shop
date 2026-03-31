@@ -30,3 +30,7 @@ export function clearAdminSession() {
 export function isAdminUser(u: AdminUser | null): boolean {
   return u?.role === "admin";
 }
+
+export function isReadOnlyUser(u: AdminUser | null): boolean {
+  return Boolean(u) && !isAdminUser(u);
+}

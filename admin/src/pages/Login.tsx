@@ -41,13 +41,13 @@ const Login = () => {
         toast.error(data.message || "Login failed.");
         return;
       }
-      if (data.user.role !== "admin") {
-        toast.error("Access denied. Admin role required.");
-        return;
-      }
       setAdminToken(data.token);
       setAdminUser(data.user);
-      toast.success("Welcome back!");
+      toast.success(
+        data.user.role === "admin"
+          ? "Welcome back, admin!"
+          : "Signed in (read-only mode).",
+      );
       navigate(from, { replace: true });
     } catch (err) {
       const msg =
@@ -64,9 +64,11 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900 px-4">
       <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md">
         <h1 className="text-2xl font-bold text-white">
-          NavzaBD <span className="text-indigo-400">Admin</span>
+          NavzaBD <span className="text-indigo-400">Panel</span>
         </h1>
-        <p className="mt-1 text-sm text-slate-400">Sign in to manage the store</p>
+        <p className="mt-1 text-sm text-slate-400">
+          Sign in to view the panel (only admins can edit/delete)
+        </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
           <div>

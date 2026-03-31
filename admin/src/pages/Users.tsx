@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2, Pencil, Trash2 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { getAdminUser, isAdminUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 type Address = {
@@ -35,6 +36,7 @@ type UserCreatePayload = {
 const ROLES = ["user", "admin", "deliveryman"] as const;
 
 const Users = () => {
+  const isAdmin = isAdminUser(getAdminUser());
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -114,6 +116,10 @@ const Users = () => {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!addValid) {
       toast.error("Please fill all required fields correctly.");
       return;
@@ -152,6 +158,10 @@ const Users = () => {
 
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!editing) return;
     if (!editValid) {
       toast.error("Please fill all required fields correctly.");
@@ -185,6 +195,10 @@ const Users = () => {
   }
 
   async function handleDelete(id: string) {
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!window.confirm("Delete this user permanently?")) return;
     setRowAction(id);
     setSaving(true);
@@ -216,6 +230,7 @@ const Users = () => {
           type="button"
           onClick={() => setAddOpen(true)}
           className="bg-indigo-600"
+          disabled={!isAdmin}
         >
           + Add User
         </Button>
@@ -270,7 +285,7 @@ const Users = () => {
                         type="button"
                         className="inline-flex items-center gap-1 text-indigo-600 hover:underline"
                         onClick={() => openEdit(u)}
-                        disabled={rowAction === u._id && saving}
+                        disabled={!isAdmin || (rowAction === u._id && saving)}
                       >
                         <Pencil className="h-4 w-4" />
                         Edit
@@ -279,7 +294,7 @@ const Users = () => {
                         type="button"
                         className="inline-flex items-center gap-1 text-red-600 hover:underline"
                         onClick={() => void handleDelete(u._id)}
-                        disabled={rowAction === u._id && saving}
+                        disabled={!isAdmin || (rowAction === u._id && saving)}
                       >
                         {rowAction === u._id && saving ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -318,6 +333,7 @@ const Users = () => {
                   onChange={(e) =>
                     setAddForm((p) => ({ ...p, name: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -329,6 +345,7 @@ const Users = () => {
                   onChange={(e) =>
                     setAddForm((p) => ({ ...p, email: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -340,6 +357,7 @@ const Users = () => {
                   onChange={(e) =>
                     setAddForm((p) => ({ ...p, password: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -350,6 +368,7 @@ const Users = () => {
                   onChange={(e) =>
                     setAddForm((p) => ({ ...p, role: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 >
                   {ROLES.map((r) => (
                     <option key={r} value={r}>
@@ -359,7 +378,11 @@ const Users = () => {
                 </select>
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="bg-indigo-600" disabled={!addValid || saving}>
+                <Button
+                  type="submit"
+                  className="bg-indigo-600"
+                  disabled={!isAdmin || !addValid || saving}
+                >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -393,6 +416,7 @@ const Users = () => {
                   onChange={(e) =>
                     setEditForm((p) => ({ ...p, name: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -404,6 +428,7 @@ const Users = () => {
                   onChange={(e) =>
                     setEditForm((p) => ({ ...p, email: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -414,6 +439,7 @@ const Users = () => {
                   onChange={(e) =>
                     setEditForm((p) => ({ ...p, role: e.target.value }))
                   }
+                  disabled={!isAdmin || saving}
                 >
                   {ROLES.map((r) => (
                     <option key={r} value={r}>
@@ -431,10 +457,15 @@ const Users = () => {
                     setEditForm((p) => ({ ...p, avatar: e.target.value }))
                   }
                   placeholder="https://..."
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="bg-indigo-600" disabled={!editValid || saving}>
+                <Button
+                  type="submit"
+                  className="bg-indigo-600"
+                  disabled={!isAdmin || !editValid || saving}
+                >
                   {saving && rowAction === editing._id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (

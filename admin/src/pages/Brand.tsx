@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Loader2, Pencil, Trash2 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { getAdminUser, isAdminUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 type BrandRow = {
@@ -15,6 +16,7 @@ type BrandRow = {
 };
 
 const Brand = () => {
+  const isAdmin = isAdminUser(getAdminUser());
   const [brands, setBrands] = useState<BrandRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -94,6 +96,10 @@ const Brand = () => {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
 
     const cleanName = name.trim();
     const cleanDescription = description.trim();
@@ -135,6 +141,10 @@ const Brand = () => {
 
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!editing) return;
 
     const cleanName = editing.name.trim();
@@ -174,6 +184,10 @@ const Brand = () => {
   }
 
   async function handleDelete(id: string) {
+    if (!isAdmin) {
+      toast.error("Permission denied.");
+      return;
+    }
     if (!window.confirm("Delete this brand permanently?")) return;
     setRowAction(id);
     setSaving(true);
@@ -218,6 +232,7 @@ const Brand = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. BabyCare"
+              disabled={!isAdmin || saving}
             />
           </div>
           <div className="md:col-span-1">
@@ -229,6 +244,7 @@ const Brand = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short brand description"
+              disabled={!isAdmin || saving}
             />
           </div>
           <div className="md:col-span-2">
@@ -238,6 +254,7 @@ const Brand = () => {
               accept="image/*"
               className="mt-1 w-full text-sm"
               onChange={(e) => onSelectImage(e.target.files?.[0] ?? null)}
+              disabled={!isAdmin || saving}
             />
             {preview ? (
               <img
@@ -251,7 +268,7 @@ const Brand = () => {
         <Button
           type="submit"
           className="mt-5 bg-indigo-600"
-          disabled={!canSaveAdd || saving}
+          disabled={!isAdmin || !canSaveAdd || saving}
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Brand"}
         </Button>
@@ -298,7 +315,7 @@ const Brand = () => {
                         type="button"
                         className="inline-flex items-center gap-1 text-indigo-600 hover:underline"
                         onClick={() => openEdit(b)}
-                        disabled={rowAction === b._id && saving}
+                        disabled={!isAdmin || (rowAction === b._id && saving)}
                       >
                         <Pencil className="h-4 w-4" />
                         Edit
@@ -307,7 +324,7 @@ const Brand = () => {
                         type="button"
                         className="inline-flex items-center gap-1 text-red-600 hover:underline"
                         onClick={() => void handleDelete(b._id)}
-                        disabled={rowAction === b._id && saving}
+                        disabled={!isAdmin || (rowAction === b._id && saving)}
                       >
                         {rowAction === b._id && saving ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -347,6 +364,7 @@ const Brand = () => {
                   onChange={(e) =>
                     setEditing({ ...editing, name: e.target.value })
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -359,6 +377,7 @@ const Brand = () => {
                   onChange={(e) =>
                     setEditing({ ...editing, description: e.target.value })
                   }
+                  disabled={!isAdmin || saving}
                 />
               </div>
               <div>
@@ -372,6 +391,7 @@ const Brand = () => {
                   onChange={(e) =>
                     onSelectEditImage(e.target.files?.[0] ?? null)
                   }
+                  disabled={!isAdmin || saving}
                 />
                 {editPreview ? (
                   <img
@@ -391,7 +411,7 @@ const Brand = () => {
                 <Button
                   type="submit"
                   className="bg-indigo-600"
-                  disabled={saving}
+                  disabled={!isAdmin || saving}
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
