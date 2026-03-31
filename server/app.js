@@ -12,6 +12,7 @@ const swaggerUi = require("swagger-ui-express");
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
+const adminAuthRoutes = require("./routes/adminAuthRoutes");
 const userRouters = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -75,6 +76,7 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminAuthRoutes);
 app.use("/api/users", userRouters);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
