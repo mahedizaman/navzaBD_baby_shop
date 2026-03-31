@@ -11,11 +11,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { getProductById } from "@/services/products";
 import type { ProductListItem } from "@/services/types";
-
-function formatBDT(amount: number) {
-  const v = Number.isFinite(amount) ? amount : 0;
-  return `৳${v.toFixed(0)}`;
-}
+import PriceDisplay from "@/components/common/PriceDisplay";
 
 type WishlistProduct = ProductListItem & { finalPrice?: number };
 
@@ -181,11 +177,11 @@ export default function WishlistPage() {
                       </h3>
                       <div className="mt-2 flex items-center justify-between">
                         <span className="text-[#1e1250] font-bold">
-                          {formatBDT(finalPrice)}
+                          <PriceDisplay amountBDT={finalPrice} />
                         </span>
                         {discount > 0 ? (
                           <span className="text-gray-400 text-xs line-through">
-                            {formatBDT(p.price)}
+                            <PriceDisplay amountBDT={p.price} />
                           </span>
                         ) : null}
                       </div>

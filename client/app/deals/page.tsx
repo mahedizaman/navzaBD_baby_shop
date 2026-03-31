@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getProducts } from "@/services";
 import type { ProductListItem } from "@/services";
+import PriceDisplay from "@/components/common/PriceDisplay";
 
 export default function DealsPage() {
   const [products, setProducts] = useState<ProductListItem[]>([]);
@@ -101,10 +102,10 @@ export default function DealsPage() {
 
                     <CardFooter className="flex items-end gap-2 p-4 pt-0">
                       <span className="text-sm text-muted-foreground line-through">
-                        ৳{product.price.toFixed(0)}
+                        <PriceDisplay amountBDT={product.price} />
                       </span>
                       <span className="text-2xl font-extrabold leading-none text-red-600">
-                        ৳{salePrice.toFixed(0)}
+                        <PriceDisplay amountBDT={salePrice} />
                       </span>
                     </CardFooter>
                   </Card>

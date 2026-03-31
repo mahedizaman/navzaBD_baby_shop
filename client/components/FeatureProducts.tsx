@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useToast } from "@/components/common/ToastHost";
+import PriceDisplay from "@/components/common/PriceDisplay";
 
 const PRODUCT_NAME_TRANSLATIONS: Record<string, string> = {
   "সফট বেবি রোমপার": "Soft Baby Romper",
@@ -155,11 +156,11 @@ function ProductCard({ product }: { product: ProductListItem }) {
 
           <div className="flex items-center gap-2 mb-3">
             <span className="text-base font-bold text-[#1e1250]">
-              ৳{finalPrice.toFixed(0)}
+              <PriceDisplay amountBDT={finalPrice} />
             </span>
             {discount > 0 && (
               <span className="text-xs text-gray-400 line-through">
-                ৳{product.price.toFixed(0)}
+                <PriceDisplay amountBDT={product.price} />
               </span>
             )}
           </div>

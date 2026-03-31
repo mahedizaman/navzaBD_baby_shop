@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import type { ProductListItem } from "@/services/types";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import PriceDisplay from "@/components/common/PriceDisplay";
 
 function getLabel(
   ref: ProductListItem["category"] | ProductListItem["brand"],
@@ -58,11 +61,11 @@ export function ProductCard({ product }: Props) {
         <CardFooter className="flex flex-wrap items-baseline gap-2 px-3 pb-3 pt-0">
           {hasDiscount ? (
             <span className="text-sm text-muted-foreground line-through">
-              ৳{product.price.toFixed(0)}
+              <PriceDisplay amountBDT={product.price} />
             </span>
           ) : null}
           <span className="text-lg font-semibold text-primary">
-            ৳{finalPrice.toFixed(0)}
+            <PriceDisplay amountBDT={finalPrice} />
           </span>
         </CardFooter>
       </Card>

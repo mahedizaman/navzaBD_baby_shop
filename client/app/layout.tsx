@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Footer from "@/components/footer/Footer";
 import { Syne, DM_Sans } from "next/font/google";
 import { ToastHost } from "@/components/common/ToastHost";
+import { CurrencyProvider } from "@/lib/currency";
 
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
@@ -25,9 +26,11 @@ export default function RootLayout({
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className={`${geist.variable} font-sans antialiased`}>
         <ToastHost>
-          <Header />
-          {children}
-          <Footer />
+          <CurrencyProvider>
+            <Header />
+            {children}
+            <Footer />
+          </CurrencyProvider>
         </ToastHost>
       </body>
     </html>

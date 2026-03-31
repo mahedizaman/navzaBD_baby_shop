@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import Container from "@/components/common/Container";
@@ -5,6 +7,7 @@ import { AddToCartButton } from "@/components/shop/AddToCartButton";
 import type { ProductListItem } from "@/services/types";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import PriceDisplay from "@/components/common/PriceDisplay";
 
 export type ProductDetailData = ProductListItem & { finalPrice?: number };
 
@@ -70,11 +73,11 @@ export function ProductDetailView({ product }: Props) {
           <div className="flex flex-wrap items-baseline gap-3">
             {hasDiscount ? (
               <span className="text-lg text-muted-foreground line-through">
-                ৳{product.price.toFixed(0)}
+                <PriceDisplay amountBDT={product.price} />
               </span>
             ) : null}
             <span className="text-3xl font-semibold text-primary">
-              ৳{finalPrice.toFixed(0)}
+              <PriceDisplay amountBDT={finalPrice} />
             </span>
           </div>
 

@@ -7,11 +7,7 @@ import { motion } from "framer-motion";
 import Container from "@/components/common/Container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCartStore } from "@/store/useCartStore";
-
-function formatBDT(amount: number) {
-  const v = Number.isFinite(amount) ? amount : 0;
-  return `৳${v.toFixed(0)}`;
-}
+import PriceDisplay from "@/components/common/PriceDisplay";
 
 export default function CartPage() {
   const lines = useCartStore((s) => s.lines);
@@ -102,7 +98,7 @@ export default function CartPage() {
 
                       <td className="px-4 py-4">
                         <span className="text-[#1a1a2e] font-semibold">
-                          {formatBDT(line.price)}
+                          <PriceDisplay amountBDT={line.price} />
                         </span>
                       </td>
 
@@ -146,7 +142,7 @@ export default function CartPage() {
 
                       <td className="px-4 py-4 text-right">
                         <span className="text-[#1e1250] font-bold">
-                          {formatBDT(line.price * line.qty)}
+                          <PriceDisplay amountBDT={line.price * line.qty} />
                         </span>
                       </td>
                     </motion.tr>
@@ -178,7 +174,7 @@ export default function CartPage() {
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Total price</span>
                   <span className="font-bold text-[#1e1250]">
-                    {formatBDT(total)}
+                    <PriceDisplay amountBDT={total} />
                   </span>
                 </div>
 
@@ -187,7 +183,7 @@ export default function CartPage() {
                     Checkout
                   </p>
                   <p className="text-white font-bold mt-1">
-                    {formatBDT(total)}
+                    <PriceDisplay amountBDT={total} />
                   </p>
                 </div>
 

@@ -8,16 +8,12 @@ import { Loader2 } from "lucide-react";
 import Container from "@/components/common/Container";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/useCartStore";
+import PriceDisplay from "@/components/common/PriceDisplay";
 import {
   getStoredAuthToken,
   initiatePayment,
   type InitiatePaymentBody,
 } from "@/services";
-
-function formatBDT(amount: number) {
-  const v = Number.isFinite(amount) ? amount : 0;
-  return `৳${v.toFixed(0)}`;
-}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -184,7 +180,7 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Order total</span>
                 <span className="text-lg font-bold text-primary">
-                  {formatBDT(total)}
+                  <PriceDisplay amountBDT={total} />
                 </span>
               </div>
               <Button

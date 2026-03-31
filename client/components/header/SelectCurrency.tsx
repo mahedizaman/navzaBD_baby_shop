@@ -1,90 +1,30 @@
-"use client"
-import { useState, useRef, useEffect } from "react";
+"use client";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Globe, ChevronDown, Check } from "lucide-react";
+import { useCurrency, type CurrencyCode } from "@/lib/currency";
 
 const currencies = [
   {
-    value: "usd",
+    value: "USD",
     label: "US Dollar",
     code: "USD",
     symbol: "$",
     locale: "en-US",
   },
   {
-    value: "bdt",
+    value: "BDT",
     label: "Bangladeshi Taka",
     code: "BDT",
     symbol: "৳",
     locale: "bn-BD",
   },
-  { value: "eur", label: "Euro", code: "EUR", symbol: "€", locale: "de-DE" },
-  {
-    value: "gbp",
-    label: "British Pound",
-    code: "GBP",
-    symbol: "£",
-    locale: "en-GB",
-  },
-  {
-    value: "inr",
-    label: "Indian Rupee",
-    code: "INR",
-    symbol: "₹",
-    locale: "en-IN",
-  },
-  {
-    value: "sar",
-    label: "Saudi Riyal",
-    code: "SAR",
-    symbol: "﷼",
-    locale: "ar-SA",
-  },
-  {
-    value: "aed",
-    label: "UAE Dirham",
-    code: "AED",
-    symbol: "د.إ",
-    locale: "ar-AE",
-  },
-  {
-    value: "jpy",
-    label: "Japanese Yen",
-    code: "JPY",
-    symbol: "¥",
-    locale: "ja-JP",
-  },
-  {
-    value: "cad",
-    label: "Canadian Dollar",
-    code: "CAD",
-    symbol: "CA$",
-    locale: "en-CA",
-  },
-  {
-    value: "aud",
-    label: "Australian Dollar",
-    code: "AUD",
-    symbol: "A$",
-    locale: "en-AU",
-  },
-  {
-    value: "cny",
-    label: "Chinese Yuan",
-    code: "CNY",
-    symbol: "¥",
-    locale: "zh-CN",
-  },
-  {
-    value: "pkr",
-    label: "Pakistani Rupee",
-    code: "PKR",
-    symbol: "₨",
-    locale: "en-PK",
-  },
 ];
 
 const SelectCurrency = () => {
-  const [selected, setSelected] = useState(currencies[0]);
+  const { code, setCurrency } = useCurrency();
+  const selected = useMemo(() => {
+    return currencies.find((c) => c.code === code) ?? currencies[0];
+  }, [code]);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -187,7 +127,7 @@ const SelectCurrency = () => {
                     role="option"
                     aria-selected={isActive}
                     onClick={() => {
-                      setSelected(currency);
+                      setCurrency(currency.code as CurrencyCode);
                       setOpen(false);
                       setSearch("");
                     }}
