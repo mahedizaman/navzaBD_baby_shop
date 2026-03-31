@@ -38,11 +38,8 @@ const httpServer = http.createServer(app);
 // Socket.io setup
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-      "http://localhost:5173", // Admin panel
-      "http://localhost:3000", // Client
-    ],
-    credentials: true,
+    origin: "*",
+    credentials: false,
   },
 });
 
@@ -68,12 +65,8 @@ app.post(
 // Middlewares
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "http://localhost:8000",
-    ],
-    credentials: true,
+    origin: "*",
+    credentials: false,
   }),
 );
 

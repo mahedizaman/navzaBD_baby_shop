@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NavzaBD API Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2430;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0;
+    overflow-y: auto;
+    padding-bottom: 40px;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo h1 {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .sidebar-logo span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .base-url-box {
+    margin: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .base-url-box label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .base-url-box code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  .nav-section {
+    padding: 8px 0;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    padding: 8px 20px 4px;
+    font-weight: 600;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 20px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.15s;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    color: var(--text);
+    background: rgba(79, 142, 247, 0.06);
+    border-left-color: var(--accent);
+  }
+
+  .nav-link .count {
+    margin-left: auto;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 260px;
+    flex: 1;
+    padding: 0 48px 80px;
+    max-width: calc(100vw - 260px);
+  }
+
+  .page-header {
+    padding: 48px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .page-header h1 {
+    font-family: var(--display);
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  .page-header h1 span { color: var(--accent); }
+
+  .page-header p {
+    margin-top: 12px;
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .meta-item strong { color: var(--text); }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 64px;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .section-header h2 {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .section-desc {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.7;
+    max-width: 680px;
+  }
+
+  .base-path {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  /* ENDPOINT CARD */
+  .endpoint {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .endpoint:hover { border-color: #2a3346; }
+
+  .endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .method {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    min-width: 58px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .method.GET    { background: rgba(34,197,94,0.12);  color: var(--green); }
+  .method.POST   { background: rgba(79,142,247,0.12); color: var(--accent); }
+  .method.PUT    { background: rgba(245,158,11,0.12); color: var(--yellow); }
+  .method.DELETE { background: rgba(239,68,68,0.12);  color: var(--red); }
+
+  .endpoint-path {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .endpoint-summary {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .access-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .access-badge.public     { background: rgba(34,197,94,0.1);  color: var(--green); }
+  .access-badge.protected  { background: rgba(245,158,11,0.1); color: var(--yellow); }
+  .access-badge.admin      { background: rgba(239,68,68,0.1);  color: var(--red); }
+  .access-badge.webhook    { background: rgba(6,182,212,0.1);  color: var(--cyan); }
+
+  .chevron {
+    margin-left: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+    transition: transform 0.2s;
+  }
+
+  .endpoint.open .chevron { transform: rotate(180deg); }
+
+  .endpoint-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 24px 20px;
+  }
+
+  .endpoint.open .endpoint-body { display: block; }
+
+  /* DESCRIPTION */
+  .field-desc {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.75;
+    margin-bottom: 24px;
+  }
+
+  /* PARAMS GRID */
+  .params-section { margin-bottom: 24px; }
+
+  .params-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .param-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .param-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+  }
+
+  .param-table th:first-child { border-radius: 6px 0 0 0; }
+  .param-table th:last-child  { border-radius: 0 6px 0 0; }
+
+  .param-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .param-table tr:last-child td { border-bottom: none; }
+
+  .param-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--cyan);
+  }
+
+  .param-type {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent2);
+  }
+
+  .param-required {
+    font-size: 10px;
+    background: rgba(239,68,68,0.1);
+    color: var(--red);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+
+  .param-optional {
+    font-size: 10px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: #a9b4c9;
+    margin-top: 8px;
+  }
+
+  .code-block .key   { color: #7dd3fc; }
+  .code-block .str   { color: #86efac; }
+  .code-block .num   { color: #fbbf24; }
+  .code-block .type  { color: var(--accent2); }
+  .code-block .note  { color: var(--text-muted); font-style: italic; }
+
+  /* RESPONSE SECTION */
+  .response-section { margin-top: 8px; }
+
+  .response-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .status-code {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .status-code.s200 { background: rgba(34,197,94,0.12);  color: var(--green); }
+  .status-code.s201 { background: rgba(79,142,247,0.12); color: var(--accent); }
+  .status-code.s400 { background: rgba(245,158,11,0.12); color: var(--yellow); }
+  .status-code.s401 { background: rgba(239,68,68,0.12);  color: var(--red); }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ACCESS LEGEND */
+  .legend {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 48px;
+  }
+
+  .legend h3 {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface2);
+    border-radius: 6px;
+  }
+
+  .legend-item p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 3px;
+    line-height: 1.5;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NavzaBD API</h1>
+    <span>v1.0.0 · REST API Reference</span>
+  </div>
+  <div class="base-url-box">
+    <label>Base URL</label>
+    <code>http://localhost:8000</code>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Endpoints</div>
+    <a class="nav-link" href="#auth">Authentication <span class="count">4</span></a>
+    <a class="nav-link" href="#users">Users <span class="count">8</span></a>
+    <a class="nav-link" href="#products">Products <span class="count">6</span></a>
+    <a class="nav-link" href="#categories">Categories <span class="count">5</span></a>
+    <a class="nav-link" href="#brands">Brands <span class="count">5</span></a>
+    <a class="nav-link" href="#orders">Orders <span class="count">8</span></a>
+    <a class="nav-link" href="#cart">Cart <span class="count">5</span></a>
+    <a class="nav-link" href="#wishlist">Wishlist <span class="count">5</span></a>
+    <a class="nav-link" href="#banners">Banners <span class="count">5</span></a>
+    <a class="nav-link" href="#payments">Payments <span class="count">4</span></a>
+    <a class="nav-link" href="#analytics">Analytics <span class="count">4</span></a>
+    <a class="nav-link" href="#stats">Stats <span class="count">1</span></a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="page-header">
+    <h1>NavzaBD <span>API</span> Reference</h1>
+    <p>Complete REST API documentation for the NavzaBD e-commerce backend. All endpoints, parameters, request bodies, and expected responses are documented below.</p>
+    <div class="meta-row">
+      <div class="meta-item">📦 <strong>Version</strong> 1.0.0</div>
+      <div class="meta-item">🔐 <strong>Auth</strong> JWT Bearer Token</div>
+      <div class="meta-item">🗄️ <strong>Database</strong> MongoDB</div>
+      <div class="meta-item">⚡ <strong>Runtime</strong> Node.js + Express</div>
+    </div>
+  </div>
+
+  <!-- ACCESS LEGEND -->
+  <div class="legend">
+    <h3>Access Levels</h3>
+    <div class="legend-grid">
+      <div class="legend-item">
+        <span class="access-badge public">Public</span>
+        <p>No authentication required. Open to all requests.</p>
+      </div>
+      <div class="legend-item">
+        <span class="access-badge protected">Protected</span>
+        <p>Requires a valid JWT token in the <code>Authorization</code> header.</p>
+      </div>
+      <div class="legend-item">
+        <span class="access-badge admin">Admin only</span>
+        <p>Requires JWT token with admin role. Standard users are rejected.</p>
+      </div>
+      <div class="legend-item">
+        <span class="access-badge webhook">Webhook</span>
+        <p>Called by external services (e.g., Stripe). No user token needed.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="section" id="auth">
+    <div class="section-header">
+      <h2>Authentication</h2>
+      <span class="base-path">/api/auth</span>
+    </div>
+    <p class="section-desc">Handles user registration, login, logout, and profile retrieval. Login returns a JWT token that must be included in the <code>Authorization: Bearer &lt;token&gt;</code> header for all protected routes.</p>
+
+    <!-- Register -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/auth/register</span>
+        <span class="access-badge public">Public</span>
+        <span class="endpoint-summary">Register a new user</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Creates a new user account. Passwords are hashed before storage. Returns the created user object on success.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">name</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>Full name of the user.</td></tr>
+            <tr><td><span class="param-name">email</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>Must be a valid, unique email address.</td></tr>
+            <tr><td><span class="param-name">password</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>Plain text password. Will be hashed server-side.</td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Example Request</div>
+          <div class="code-block"><span class="key">"name"</span>: <span class="str">"Mahedi Zaman"</span>,
+<span class="key">"email"</span>: <span class="str">"mahedi@example.com"</span>,
+<span class="key">"password"</span>: <span class="str">"securepassword123"</span></div>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Responses</div>
+          <div class="response-label"><span class="status-code s201">201 Created</span> User successfully registered.</div>
+          <div class="response-label"><span class="status-code s400">400 Bad Request</span> Missing fields or email already in use.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/auth/login</span>
+        <span class="access-badge public">Public</span>
+        <span class="endpoint-summary">Authenticate and get token</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Validates credentials and returns a signed JWT token. The token should be stored client-side and sent with all subsequent protected requests via the <code>Authorization: Bearer &lt;token&gt;</code> header.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">email</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>Registered email address.</td></tr>
+            <tr><td><span class="param-name">password</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>Account password (plain text, compared to hash).</td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Example Response · 200 OK</div>
+          <div class="code-block"><span class="key">"token"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span>,
+<span class="key">"user"</span>: {
+  <span class="key">"_id"</span>: <span class="str">"64f2a..."</span>,
+  <span class="key">"name"</span>: <span class="str">"Mahedi Zaman"</span>,
+  <span class="key">"email"</span>: <span class="str">"mahedi@example.com"</span>,
+  <span class="key">"role"</span>: <span class="str">"user"</span>
+}</div>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Responses</div>
+          <div class="response-label"><span class="status-code s200">200 OK</span> Login successful. Returns JWT token and user data.</div>
+          <div class="response-label"><span class="status-code s401">401 Unauthorized</span> Invalid email or password.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/auth/logout</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Invalidate current session</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Invalidates the current user session by clearing the token cookie. After calling this endpoint, the token is no longer valid for subsequent requests.</p>
+        <div class="params-section">
+          <div class="params-title">Request Headers</div>
+          <table class="param-table">
+            <tr><th>Header</th><th>Value</th><th>Required</th></tr>
+            <tr><td><span class="param-name">Authorization</span></td><td><span class="param-type">Bearer &lt;token&gt;</span></td><td><span class="param-required">required</span></td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Responses</div>
+          <div class="response-label"><span class="status-code s200">200 OK</span> Session cleared successfully.</div>
+          <div class="response-label"><span class="status-code s401">401 Unauthorized</span> Token missing or invalid.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/auth/profile</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Get current user profile</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns the full profile data of the currently authenticated user, decoded from the JWT token. Password field is excluded from the response.</p>
+        <div class="params-section">
+          <div class="params-title">Request Headers</div>
+          <table class="param-table">
+            <tr><th>Header</th><th>Value</th><th>Required</th></tr>
+            <tr><td><span class="param-name">Authorization</span></td><td><span class="param-type">Bearer &lt;token&gt;</span></td><td><span class="param-required">required</span></td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Example Response · 200 OK</div>
+          <div class="code-block"><span class="key">"_id"</span>: <span class="str">"64f2a..."</span>,
+<span class="key">"name"</span>: <span class="str">"Mahedi Zaman"</span>,
+<span class="key">"email"</span>: <span class="str">"mahedi@example.com"</span>,
+<span class="key">"role"</span>: <span class="str">"user"</span>,
+<span class="key">"addresses"</span>: [],
+<span class="key">"createdAt"</span>: <span class="str">"2025-01-01T00:00:00.000Z"</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="section" id="products">
+    <div class="section-header">
+      <h2>Products</h2>
+      <span class="base-path">/api/products</span>
+    </div>
+    <p class="section-desc">Full CRUD for products. Public users can browse and search. Only admins can create, update, or delete. Authenticated users can submit ratings.</p>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/products</span>
+        <span class="access-badge public">Public</span>
+        <span class="endpoint-summary">List all products with filters</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns a paginated list of all products. Supports filtering by category, brand, and price range. Results can be sorted and searched by keyword.</p>
+        <div class="params-section">
+          <div class="params-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">page</span></td><td><span class="param-type">number</span></td><td><span class="param-optional">optional</span></td><td>Page number for pagination. Default: <code>1</code>.</td></tr>
+            <tr><td><span class="param-name">limit</span></td><td><span class="param-type">number</span></td><td><span class="param-optional">optional</span></td><td>Number of results per page. Default: <code>10</code>.</td></tr>
+            <tr><td><span class="param-name">sortOrder</span></td><td><span class="param-type">string</span></td><td><span class="param-optional">optional</span></td><td>Sort direction: <code>asc</code> or <code>desc</code>.</td></tr>
+            <tr><td><span class="param-name">category</span></td><td><span class="param-type">string</span></td><td><span class="param-optional">optional</span></td><td>Filter by category ID or slug.</td></tr>
+            <tr><td><span class="param-name">brand</span></td><td><span class="param-type">string</span></td><td><span class="param-optional">optional</span></td><td>Filter by brand ID or slug.</td></tr>
+            <tr><td><span class="param-name">priceMin</span></td><td><span class="param-type">number</span></td><td><span class="param-optional">optional</span></td><td>Minimum price filter.</td></tr>
+            <tr><td><span class="param-name">priceMax</span></td><td><span class="param-type">number</span></td><td><span class="param-optional">optional</span></td><td>Maximum price filter.</td></tr>
+            <tr><td><span class="param-name">search</span></td><td><span class="param-type">string</span></td><td><span class="param-optional">optional</span></td><td>Keyword search against product name and description.</td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Example URL</div>
+          <div class="code-block">GET /api/products?page=1&limit=12&category=chips&sortOrder=asc&priceMin=5&priceMax=50</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/products</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Create a new product</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Creates one or multiple products. Accepts either a single JSON object, a JSON array for bulk creation, or <code>multipart/form-data</code> to include an image file upload in the same request.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">name</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>Product name.</td></tr>
+            <tr><td><span class="param-name">description</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>Product description.</td></tr>
+            <tr><td><span class="param-name">price</span></td><td><span class="param-type">number</span></td><td><span class="param-required">required</span></td><td>Price in base currency.</td></tr>
+            <tr><td><span class="param-name">categoryId</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>MongoDB ObjectId of the category.</td></tr>
+            <tr><td><span class="param-name">brandId</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>MongoDB ObjectId of the brand.</td></tr>
+            <tr><td><span class="param-name">discountPercentage</span></td><td><span class="param-type">number</span></td><td><span class="param-optional">optional</span></td><td>Discount percentage (0–100).</td></tr>
+            <tr><td><span class="param-name">stock</span></td><td><span class="param-type">number</span></td><td><span class="param-optional">optional</span></td><td>Available stock quantity. Default: <code>0</code>.</td></tr>
+            <tr><td><span class="param-name">image</span></td><td><span class="param-type">string | file</span></td><td><span class="param-optional">optional</span></td><td>Image URL (JSON) or file upload (FormData).</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/products/:id</span>
+        <span class="access-badge public">Public</span>
+        <span class="endpoint-summary">Get single product by ID</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns a single product by its MongoDB ObjectId. The response includes fully populated <code>category</code> and <code>brand</code> objects (not just IDs).</p>
+        <div class="params-section">
+          <div class="params-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+            <tr><td><span class="param-name">id</span></td><td><span class="param-type">string</span></td><td>MongoDB ObjectId of the product.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method PUT">PUT</span>
+        <span class="endpoint-path">/api/products/:id</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Update a product</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Updates an existing product's fields. All fields are optional — only provided fields are updated. Supports both JSON and <code>multipart/form-data</code> for image replacement.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body (all fields optional)</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td><span class="param-name">name</span></td><td><span class="param-type">string</span></td><td>Updated product name.</td></tr>
+            <tr><td><span class="param-name">description</span></td><td><span class="param-type">string</span></td><td>Updated description.</td></tr>
+            <tr><td><span class="param-name">price</span></td><td><span class="param-type">number</span></td><td>Updated price.</td></tr>
+            <tr><td><span class="param-name">stock</span></td><td><span class="param-type">number</span></td><td>Updated stock quantity.</td></tr>
+            <tr><td><span class="param-name">discountPercentage</span></td><td><span class="param-type">number</span></td><td>Updated discount.</td></tr>
+            <tr><td><span class="param-name">categoryId</span></td><td><span class="param-type">string</span></td><td>Updated category reference.</td></tr>
+            <tr><td><span class="param-name">brandId</span></td><td><span class="param-type">string</span></td><td>Updated brand reference.</td></tr>
+            <tr><td><span class="param-name">image</span></td><td><span class="param-type">string | file</span></td><td>New image URL or file upload.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method DELETE">DELETE</span>
+        <span class="endpoint-path">/api/products/:id</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Delete a product</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Permanently removes a product from the database by its ID. This action is irreversible.</p>
+        <div class="params-section">
+          <div class="params-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+            <tr><td><span class="param-name">id</span></td><td><span class="param-type">string</span></td><td>MongoDB ObjectId of the product to delete.</td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Responses</div>
+          <div class="response-label"><span class="status-code s200">200 OK</span> Product deleted successfully.</div>
+          <div class="response-label"><span class="status-code s401">401 Unauthorized</span> Token missing or not admin.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/products/:id/rate</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Rate a product</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Allows an authenticated user to submit a rating (and optional comment) for a product. If the user has already rated the product, the existing rating is updated instead of creating a duplicate.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">rating</span></td><td><span class="param-type">number</span></td><td><span class="param-required">required</span></td><td>Rating value between 1 and 5.</td></tr>
+            <tr><td><span class="param-name">comment</span></td><td><span class="param-type">string</span></td><td><span class="param-optional">optional</span></td><td>Optional review text.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="section" id="orders">
+    <div class="section-header">
+      <h2>Orders</h2>
+      <span class="base-path">/api/orders</span>
+    </div>
+    <p class="section-desc">Manages the full order lifecycle — from creation to fulfillment. When an order is placed, product stock is automatically decremented. Admins have additional access to all orders and fulfillment controls.</p>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/orders</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Place a new order</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Creates a new order from the user's cart. On success, the stock of each ordered product is decremented accordingly. Requires a valid shipping address and a list of order items.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">orderItems</span></td><td><span class="param-type">array</span></td><td><span class="param-required">required</span></td><td>Array of items: <code>[{ productId, name, price, quantity, image? }]</code></td></tr>
+            <tr><td><span class="param-name">shippingAddress</span></td><td><span class="param-type">object</span></td><td><span class="param-required">required</span></td><td><code>{ street, city, country, postalCode }</code></td></tr>
+            <tr><td><span class="param-name">paymentMethod</span></td><td><span class="param-type">string</span></td><td><span class="param-optional">optional</span></td><td>e.g., <code>"stripe"</code>, <code>"cod"</code>.</td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Responses</div>
+          <div class="response-label"><span class="status-code s201">201 Created</span> Order placed. Returns the full order object.</div>
+          <div class="response-label"><span class="status-code s400">400 Bad Request</span> Insufficient stock or missing fields.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/orders</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Get orders for current user</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns all orders belonging to the authenticated user. If the user has an admin role, this endpoint returns all orders in the system instead.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/orders/admin</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Get all orders (admin view)</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns a complete list of all orders in the system with user details populated. Intended for the admin dashboard and order management panel.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method PUT">PUT</span>
+        <span class="endpoint-path">/api/orders/:id/status</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Update order status</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Updates the primary status of an order. Available statuses are <code>pending</code>, <code>paid</code>, <code>completed</code>, and <code>cancelled</code>.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Values</th></tr>
+            <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td><code>pending</code> · <code>paid</code> · <code>completed</code> · <code>cancelled</code></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method PUT">PUT</span>
+        <span class="endpoint-path">/api/orders/:id/fulfillment</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Update fulfillment status</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Updates the fulfillment/shipping status of an order. Used by admins to track physical delivery progress from the warehouse to the customer.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Values</th></tr>
+            <tr><td><span class="param-name">fulfillmentStatus</span></td><td><span class="param-type">string</span></td><td><code>pending</code> · <code>processing</code> · <code>shipped</code> · <code>delivered</code></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method PUT">PUT</span>
+        <span class="endpoint-path">/api/orders/:id/webhook-status</span>
+        <span class="access-badge webhook">Webhook</span>
+        <span class="endpoint-summary">Update status from webhook</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Called by external services like Stripe to update order status after a payment event. No user authentication is required — this endpoint is intended for server-to-server communication only.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Values</th></tr>
+            <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td><code>pending</code> · <code>processing</code> · <code>shipped</code> · <code>delivered</code> · <code>cancelled</code></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART -->
+  <div class="section" id="cart">
+    <div class="section-header">
+      <h2>Cart</h2>
+      <span class="base-path">/api/cart</span>
+    </div>
+    <p class="section-desc">Manages the user's shopping cart. Each user has a single cart document. Items can be added, updated, or removed individually, or the entire cart can be cleared at once.</p>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/cart</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Get current user's cart</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns the authenticated user's cart document, including all items and the calculated total price.</p>
+        <div class="params-section">
+          <div class="params-title">Example Response · 200 OK</div>
+          <div class="code-block"><span class="key">"items"</span>: [
+  {
+    <span class="key">"productId"</span>: <span class="str">"64f2a..."</span>,
+    <span class="key">"name"</span>: <span class="str">"Crunchy Banana Chips"</span>,
+    <span class="key">"price"</span>: <span class="num">7</span>,
+    <span class="key">"quantity"</span>: <span class="num">2</span>,
+    <span class="key">"image"</span>: <span class="str">"https://..."</span>
+  }
+],
+<span class="key">"totalPrice"</span>: <span class="num">14</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/cart</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Add or update item in cart</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Adds a product to the cart. If the product already exists in the cart, its quantity is updated to the provided value instead of adding a duplicate entry.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">productId</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>MongoDB ObjectId of the product.</td></tr>
+            <tr><td><span class="param-name">quantity</span></td><td><span class="param-type">number</span></td><td><span class="param-required">required</span></td><td>Quantity to add. Must be greater than 0.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method PUT">PUT</span>
+        <span class="endpoint-path">/api/cart/update</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Update item quantity</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Updates the quantity of a specific product already in the cart. Use this for increment/decrement controls in the cart UI.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">productId</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>MongoDB ObjectId of the product to update.</td></tr>
+            <tr><td><span class="param-name">quantity</span></td><td><span class="param-type">number</span></td><td><span class="param-required">required</span></td><td>New quantity value.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method DELETE">DELETE</span>
+        <span class="endpoint-path">/api/cart/:productId</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Remove a single item</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Removes a specific product from the cart by its ID. Other items in the cart remain unaffected.</p>
+        <div class="params-section">
+          <div class="params-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+            <tr><td><span class="param-name">productId</span></td><td><span class="param-type">string</span></td><td>MongoDB ObjectId of the product to remove.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method DELETE">DELETE</span>
+        <span class="endpoint-path">/api/cart</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Clear entire cart</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Removes all items from the user's cart at once. The cart document itself is retained but all items are cleared. Useful after a successful order placement.</p>
+        <div class="params-section">
+          <div class="params-title">Responses</div>
+          <div class="response-label"><span class="status-code s200">200 OK</span> Cart cleared successfully.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="section" id="payments">
+    <div class="section-header">
+      <h2>Payments</h2>
+      <span class="base-path">/api/payments · /api/payment</span>
+    </div>
+    <p class="section-desc">Stripe payment integration supporting two flows: <strong>Payment Intent</strong> (for card-based flows) and <strong>Checkout Session</strong> (for hosted redirect flows). Note that <code>/api/payments/...</code> and <code>/api/payment/...</code> are separate namespaces handling different flows.</p>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/payments/create-intent</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Create Stripe Payment Intent</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Creates a Stripe Payment Intent for a specific order. Returns a <code>clientSecret</code> that the frontend uses to complete the payment via Stripe.js or Stripe Elements.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">orderId</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td><td>MongoDB ObjectId of the order to pay for.</td></tr>
+            <tr><td><span class="param-name">amount</span></td><td><span class="param-type">number</span></td><td><span class="param-required">required</span></td><td>Amount in smallest currency unit (e.g., cents for USD).</td></tr>
+            <tr><td><span class="param-name">currency</span></td><td><span class="param-type">string</span></td><td><span class="param-optional">optional</span></td><td>ISO currency code. Default: <code>"usd"</code>.</td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Example Response · 200 OK</div>
+          <div class="code-block"><span class="key">"clientSecret"</span>: <span class="str">"pi_3NqX...secret_abc123"</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/payment/initiate</span>
+        <span class="access-badge protected">Protected</span>
+        <span class="endpoint-summary">Create Stripe Checkout Session</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Creates a Stripe Checkout Session and returns a hosted payment page URL. The frontend redirects the user to this URL to complete payment on Stripe's hosted page.</p>
+        <div class="params-section">
+          <div class="params-title">Request Body · application/json</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><span class="param-name">amount</span></td><td><span class="param-type">number</span></td><td><span class="param-required">required</span></td><td>Total amount for the session.</td></tr>
+            <tr><td><span class="param-name">items</span></td><td><span class="param-type">array</span></td><td><span class="param-required">required</span></td><td>Array of line items for the checkout session.</td></tr>
+            <tr><td><span class="param-name">shippingAddress</span></td><td><span class="param-type">object</span></td><td><span class="param-required">required</span></td><td>Delivery address object.</td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">Example Response · 200 OK</div>
+          <div class="code-block"><span class="key">"url"</span>: <span class="str">"https://checkout.stripe.com/c/pay/cs_live_..."</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/payment/verify</span>
+        <span class="access-badge public">Public</span>
+        <span class="endpoint-summary">Verify checkout session</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Verifies whether a Stripe Checkout Session was completed successfully. Called as the return URL handler after Stripe redirects the user back to your app.</p>
+        <div class="params-section">
+          <div class="params-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+            <tr><td><span class="param-name">session_id</span></td><td><span class="param-type">string</span></td><td>Stripe Checkout Session ID, automatically appended by Stripe to the return URL.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/payments/webhook</span>
+        <span class="access-badge webhook">Webhook · Stripe</span>
+        <span class="endpoint-summary">Handle Stripe webhook events</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Receives and processes Stripe webhook events (e.g., <code>payment_intent.succeeded</code>, <code>checkout.session.completed</code>). Automatically updates the corresponding order and payment status in the database. The raw request body must be forwarded unmodified for signature verification.</p>
+        <div class="params-section">
+          <div class="params-title">Request Headers</div>
+          <table class="param-table">
+            <tr><th>Header</th><th>Description</th></tr>
+            <tr><td><span class="param-name">stripe-signature</span></td><td>Stripe webhook signature for payload verification. Must not be modified.</td></tr>
+          </table>
+        </div>
+        <div class="params-section">
+          <div class="params-title">⚠️ Important</div>
+          <div class="code-block"><span class="note">// Express must receive the raw body for Stripe signature verification.
+// Do NOT use express.json() middleware on this route.
+// Use express.raw({ type: 'application/json' }) instead.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="section" id="analytics">
+    <div class="section-header">
+      <h2>Analytics</h2>
+      <span class="base-path">/api/analytics</span>
+    </div>
+    <p class="section-desc">All analytics endpoints are restricted to admin users and return aggregated data for use in the admin dashboard — overview cards, product performance, sales trends, and inventory alerts.</p>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/analytics/overview</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Platform overview stats</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns high-level platform metrics including total registered users, total products, total orders placed, and cumulative revenue. Designed for the top summary cards of the admin dashboard.</p>
+        <div class="params-section">
+          <div class="params-title">Example Response · 200 OK</div>
+          <div class="code-block"><span class="key">"totalUsers"</span>: <span class="num">1240</span>,
+<span class="key">"totalProducts"</span>: <span class="num">348</span>,
+<span class="key">"totalOrders"</span>: <span class="num">892</span>,
+<span class="key">"totalRevenue"</span>: <span class="num">48750.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/analytics/products</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Product performance analytics</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns product-level analytics including the top-selling products by order volume and a list of products with critically low stock levels.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/analytics/sales</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Sales data over time</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns time-series sales data broken down by day and month, including revenue totals and order counts. Used to populate line charts and bar charts in the admin dashboard.</p>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/analytics/inventory-alerts</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Low stock & out-of-stock alerts</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns a list of products that are either low in stock (below threshold) or completely out of stock. Used for inventory alert notifications in the admin panel.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="section" id="stats">
+    <div class="section-header">
+      <h2>Stats</h2>
+      <span class="base-path">/api/stats</span>
+    </div>
+    <p class="section-desc">Quick summary statistics endpoint for the admin dashboard.</p>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/stats</span>
+        <span class="access-badge admin">Admin only</span>
+        <span class="endpoint-summary">Dashboard summary</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="field-desc">Returns a condensed summary of key platform metrics — total users, products, orders, and revenue. Similar to <code>/api/analytics/overview</code> but optimized for fast dashboard card rendering.</p>
+        <div class="params-section">
+          <div class="params-title">Example Response · 200 OK</div>
+          <div class="code-block"><span class="key">"totalUsers"</span>: <span class="num">1240</span>,
+<span class="key">"totalProducts"</span>: <span class="num">348</span>,
+<span class="key">"totalOrders"</span>: <span class="num">892</span>,
+<span class="key">"totalRevenue"</span>: <span class="num">48750.00</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTHER SECTIONS PLACEHOLDER -->
+  <div class="section" id="users"><div class="section-header"><h2>Users</h2><span class="base-path">/api/users</span></div><p class="section-desc">Full user management including profile updates and address management. Admins can manage all users; regular users can only manage their own profile and addresses.</p><p style="color:var(--text-muted);font-size:13px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">8 endpoints documented — expand above sections for full reference pattern.</p></div>
+  <div class="section" id="categories"><div class="section-header"><h2>Categories</h2><span class="base-path">/api/categories</span></div><p class="section-desc">CRUD for product categories. Supports single and bulk creation, image uploads via FormData, and automatic image URL normalization on retrieval.</p><p style="color:var(--text-muted);font-size:13px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">5 endpoints — follows the same pattern as Brands and Products.</p></div>
+  <div class="section" id="brands"><div class="section-header"><h2>Brands</h2><span class="base-path">/api/brands</span></div><p class="section-desc">CRUD for product brands. Supports single and bulk creation with optional image upload. Brand GET endpoints are publicly accessible.</p><p style="color:var(--text-muted);font-size:13px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">5 endpoints — follows the same pattern as Categories.</p></div>
+  <div class="section" id="wishlist"><div class="section-header"><h2>Wishlist</h2><span class="base-path">/api/wishlist</span></div><p class="section-desc">Manages each user's saved product wishlist. Products can be added, removed, or batch-fetched with full product details.</p><p style="color:var(--text-muted);font-size:13px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">5 endpoints — follows the same pattern as Cart.</p></div>
+  <div class="section" id="banners"><div class="section-header"><h2>Banners</h2><span class="base-path">/api/banners</span></div><p class="section-desc">Manages homepage and promotional banners. Public GET, admin-only create/update/delete.</p><p style="color:var(--text-muted);font-size:13px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">5 endpoints — follows the same pattern as Categories.</p></div>
+
+</main>
+
+<script>
+  function toggle(header) {
+    const endpoint = header.closest('.endpoint');
+    endpoint.classList.toggle('open');
+  }
+
+  // Sidebar active link highlight on scroll
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+      if (window.scrollY >= section.offsetTop - 60) {
+        current = section.getAttribute('id');
+      }
+    });
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>

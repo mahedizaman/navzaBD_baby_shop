@@ -8,7 +8,8 @@ import { setAdminUser, type AdminUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 const baseURL =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:8000";
+  import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
+  "https://intelligent-upliftment-production.up.railway.app";
 
 const Login = () => {
   const navigate = useNavigate();

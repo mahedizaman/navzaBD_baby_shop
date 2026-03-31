@@ -2,7 +2,8 @@ import axios from "axios";
 import { clearAdminSession, getAdminUser, isAdminUser } from "./auth";
 
 const baseURL =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:8000";
+  import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
+  "https://intelligent-upliftment-production.up.railway.app";
 
 export const api = axios.create({
   baseURL,

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NavzaBD Admin Panel Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #111318; --surface2: #181c24; --border: #1e2430;
+    --accent: #4f8ef7; --green: #22c55e; --yellow: #f59e0b; --red: #ef4444;
+    --cyan: #06b6d4; --purple: #7c3aed; --text: #e2e8f0; --text-muted: #64748b;
+    --text-dim: #94a3b8; --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif; --display: 'Syne', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; display: flex; min-height: 100vh; }
+
+  .sidebar { width: 260px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; overflow-y: auto; padding-bottom: 40px; z-index: 100; }
+  .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h1 { font-family: var(--display); font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+  .sidebar-logo span { font-family: var(--mono); font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px; }
+  .nav-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); padding: 14px 20px 4px; font-weight: 600; }
+  .nav-link { display: block; padding: 7px 20px; color: var(--text-dim); text-decoration: none; font-size: 13px; transition: all 0.15s; border-left: 2px solid transparent; cursor: pointer; }
+  .nav-link:hover, .nav-link.active { color: var(--text); background: rgba(79,142,247,0.06); border-left-color: var(--accent); }
+
+  .main { margin-left: 260px; flex: 1; padding: 0 48px 80px; max-width: calc(100vw - 260px); }
+  .page-header { padding: 48px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+  .page-header h1 { font-family: var(--display); font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+  .page-header h1 span { color: var(--accent); }
+  .page-header p { margin-top: 10px; color: var(--text-dim); font-size: 15px; max-width: 560px; line-height: 1.7; }
+  .badge-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; font-family: var(--mono); }
+  .badge.react { background: rgba(6,182,212,0.1); color: var(--cyan); }
+  .badge.ts { background: rgba(79,142,247,0.1); color: var(--accent); }
+  .badge.vite { background: rgba(124,58,237,0.1); color: var(--purple); }
+  .badge.tailwind { background: rgba(34,197,94,0.1); color: var(--green); }
+
+  .section { margin-bottom: 60px; scroll-margin-top: 24px; }
+  .section-title { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .section-desc { color: var(--text-dim); font-size: 14px; margin-bottom: 24px; line-height: 1.7; max-width: 700px; margin-top: 10px; }
+
+  .sub-title { font-family: var(--display); font-size: 16px; font-weight: 700; margin: 28px 0 10px; color: var(--text); }
+
+  /* STEPS */
+  .steps { counter-reset: step; display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .step:last-child { border-bottom: none; }
+  .step-num { counter-increment: step; min-width: 28px; height: 28px; background: rgba(79,142,247,0.12); color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 2px; }
+  .step-content h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .step-content p { color: var(--text-dim); font-size: 13px; line-height: 1.65; }
+  .step-content code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 6px; border-radius: 3px; color: var(--cyan); }
+
+  /* TABLE */
+  .doc-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+  .doc-table th { text-align: left; padding: 9px 14px; background: var(--surface2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  .doc-table th:first-child { border-radius: 6px 0 0 0; }
+  .doc-table th:last-child { border-radius: 0 6px 0 0; }
+  .doc-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-dim); vertical-align: top; line-height: 1.55; }
+  .doc-table tr:last-child td { border-bottom: none; }
+  .doc-table td:first-child { color: var(--text); font-weight: 500; }
+  .doc-table code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 3px; color: var(--cyan); }
+  .required { font-size: 10px; background: rgba(239,68,68,0.1); color: var(--red); padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+  .optional { font-size: 10px; background: var(--surface2); color: var(--text-muted); padding: 1px 6px; border-radius: 3px; }
+
+  /* CODE */
+  .code-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 18px; font-family: var(--mono); font-size: 12px; line-height: 1.75; overflow-x: auto; color: #a9b4c9; margin: 12px 0; }
+  .code-block .key { color: #7dd3fc; }
+  .code-block .str { color: #86efac; }
+  .code-block .comment { color: var(--text-muted); font-style: italic; }
+  .code-title { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .code-title span { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+  .code-title .lang { font-size: 10px; background: var(--surface2); color: var(--text-muted); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 16px; }
+  .card h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .card p { color: var(--text-dim); font-size: 13px; line-height: 1.65; }
+
+  /* STATUS BADGE */
+  .status { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; font-family: var(--mono); }
+  .status.pending { background: rgba(245,158,11,0.1); color: var(--yellow); }
+  .status.processing { background: rgba(79,142,247,0.1); color: var(--accent); }
+  .status.shipped { background: rgba(124,58,237,0.1); color: var(--purple); }
+  .status.delivered { background: rgba(34,197,94,0.1); color: var(--green); }
+
+  /* CHECKLIST */
+  .checklist { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .checklist-item .num { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(79,142,247,0.1); padding: 2px 7px; border-radius: 4px; white-space: nowrap; margin-top: 1px; }
+  .checklist-item p { color: var(--text-dim); font-size: 13px; line-height: 1.6; }
+  .checklist-item p strong { color: var(--text); font-weight: 600; }
+
+  /* CALLOUT */
+  .callout { background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.2); border-left: 3px solid var(--accent); border-radius: 6px; padding: 14px 16px; margin: 16px 0; font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+  .callout strong { color: var(--text); }
+
+  /* GRID */
+  .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 16px; }
+  .tech-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .tech-card h4 { font-family: var(--mono); font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .tech-card p { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NavzaBD Admin</h1>
+    <span>Admin Panel Guide</span>
+  </div>
+  <div class="nav-label">Getting Started</div>
+  <a class="nav-link" href="#tech">Tech Stack</a>
+  <a class="nav-link" href="#login">Login & Navigation</a>
+  <a class="nav-link" href="#dashboard">Dashboard</a>
+  <div class="nav-label">Management</div>
+  <a class="nav-link" href="#products">Products</a>
+  <a class="nav-link" href="#brands">Brands</a>
+  <a class="nav-link" href="#categories">Categories</a>
+  <a class="nav-link" href="#orders">Orders & Invoices</a>
+  <a class="nav-link" href="#account">Account</a>
+  <div class="nav-label">Setup</div>
+  <a class="nav-link" href="#setup">Running Locally</a>
+  <a class="nav-link" href="#checklist">Quick Start</a>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Admin Panel <span>Guide</span></h1>
+    <p>Complete reference for setting up, configuring, and operating the NavzaBD admin panel.</p>
+    <div class="badge-row">
+      <span class="badge vite">Vite</span>
+      <span class="badge react">React</span>
+      <span class="badge ts">TypeScript</span>
+      <span class="badge tailwind">Tailwind CSS v4</span>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section" id="tech">
+    <div class="section-title">Tech Stack</div>
+    <div class="tech-grid">
+      <div class="tech-card"><h4>Vite + React + TypeScript</h4><p>Fast development builds and type-safe component architecture.</p></div>
+      <div class="tech-card"><h4>Tailwind CSS v4</h4><p>Modern utility-first CSS for responsive and consistent UI.</p></div>
+      <div class="tech-card"><h4>React Router v7</h4><p>SPA routing — <code style="font-family:var(--mono);font-size:11px;color:var(--cyan)">/login</code>, <code style="font-family:var(--mono);font-size:11px;color:var(--cyan)">/dashboard/...</code></p></div>
+      <div class="tech-card"><h4>Sonner</h4><p>Toast notifications for success and error feedback throughout the panel.</p></div>
+      <div class="tech-card"><h4>jsPDF</h4><p>Client-side PDF generation for invoice downloads.</p></div>
+      <div class="tech-card"><h4>Axios</h4><p>HTTP client for all backend API requests.</p></div>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="section" id="login">
+    <div class="section-title">Login & Navigation</div>
+    <p class="section-desc">The admin panel requires a user account with <code>role: "admin"</code> set in the database. Standard user accounts cannot log in.</p>
+
+    <div class="sub-title">Logging In</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-content"><h4>Start the admin panel</h4><p>Run <code>npm run dev</code> in the <code>admin</code> directory, then open <code>http://localhost:5173</code> in your browser.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Enter your credentials</h4><p>Use the email and password of a user with <code>role: "admin"</code> set in MongoDB.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Successful login</h4><p>The backend returns a <code>token</code> and <code>user</code> object. These are saved to <code>localStorage</code> as <code>admin_token</code> and <code>admin_user</code>. The app then redirects you to <code>/dashboard</code>.</p></div></div>
+    </div>
+
+    <div class="sub-title">Sidebar Navigation</div>
+    <table class="doc-table">
+      <tr><th>Route</th><th>Description</th></tr>
+      <tr><td>Dashboard</td><td>Overall sales, orders, and user statistics with charts</td></tr>
+      <tr><td>Account</td><td>Current admin's profile and address management</td></tr>
+      <tr><td>Orders</td><td>View and manage all orders; update fulfillment status</td></tr>
+      <tr><td>Product</td><td>Full product CRUD with image upload support</td></tr>
+      <tr><td>Brand</td><td>Brand list with add, edit, delete, and image upload</td></tr>
+      <tr><td>Categories</td><td>Category list with add, edit, delete, and image upload</td></tr>
+      <tr><td>Invoices</td><td>Invoice table generated from orders; download as PDF</td></tr>
+      <tr><td>Banner</td><td>Banner list and management (UI is extendable as needed)</td></tr>
+    </table>
+    <div class="callout">On mobile, the sidebar collapses into a hamburger menu accessible from the header icon. All data tables support horizontal scrolling on small screens.</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="section" id="dashboard">
+    <div class="section-title">Dashboard Overview</div>
+    <p class="section-desc">The dashboard at <code>/dashboard</code> fetches data from <code>GET /api/stats</code> and displays key metrics and charts.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px;">
+      <div class="card"><h4>💰 Total Revenue</h4><p>Cumulative sales revenue across all orders.</p></div>
+      <div class="card"><h4>📦 Total Orders</h4><p>Total number of orders placed on the platform.</p></div>
+      <div class="card"><h4>🛍️ Total Products</h4><p>Number of active products in the catalog.</p></div>
+      <div class="card"><h4>👥 Total Users</h4><p>Total registered user accounts.</p></div>
+    </div>
+    <p class="section-desc" style="margin-top:16px;">A pie or donut chart provides a visual distribution analysis of these metrics.</p>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="section" id="products">
+    <div class="section-title">Product Management</div>
+    <p class="section-desc">Manage your full product catalog from <code>/dashboard/product</code>. Products are displayed in a table with Name, Category, Brand, Price, and Stock columns.</p>
+
+    <div class="callout"><strong>Data source:</strong> <code>GET /api/products?page=1&limit=500&sortOrder=desc</code> — Category and brand fields are fully populated (names shown, not raw IDs).</div>
+
+    <div class="sub-title">Adding a New Product</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-content"><h4>Open the Products page</h4><p>Navigate to <strong>Products</strong> in the sidebar.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Fill in the form</h4>
+        <table class="doc-table" style="margin-top:10px;">
+          <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+          <tr><td>Name</td><td><span class="required">required</span></td><td>—</td></tr>
+          <tr><td>Price</td><td><span class="required">required</span></td><td>—</td></tr>
+          <tr><td>Stock</td><td><span class="required">required</span></td><td>—</td></tr>
+          <tr><td>Description</td><td><span class="required">required</span></td><td>—</td></tr>
+          <tr><td>Category</td><td><span class="required">required</span></td><td>Select from existing categories</td></tr>
+          <tr><td>Brand</td><td><span class="required">required</span></td><td>Select from existing brands</td></tr>
+          <tr><td>Discount %</td><td><span class="optional">optional</span></td><td>Between 0 and 80</td></tr>
+          <tr><td>Image</td><td><span class="optional">optional</span></td><td>File input — preview shown before submission</td></tr>
+        </table>
+      </div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Submit</h4><p>Client-side validation runs first. If any required field is empty, a <code>toast.error</code> is shown. Otherwise, a <code>FormData</code> payload is sent to <code>POST /api/products</code>. The backend uploads the image via Multer to Cloudinary, then returns the created product. A <code>toast.success("Product created.")</code> confirms success and the list refreshes.</p></div></div>
+    </div>
+
+    <div class="sub-title">Editing and Deleting</div>
+    <div class="card"><h4>✏️ Edit</h4><p>Click <strong>Edit</strong> in the Actions column. A modal opens with current values pre-filled. Update any fields or upload a new image, then submit. Calls <code>PUT /api/products/:id</code>.</p></div>
+    <div class="card"><h4>🗑️ Delete</h4><p>Click <strong>Delete</strong> → confirm in the browser dialog. Calls <code>DELETE /api/products/:id</code>. On success, the list updates and a toast notification appears.</p></div>
+  </div>
+
+  <!-- BRANDS -->
+  <div class="section" id="brands">
+    <div class="section-title">Brand Management</div>
+    <p class="section-desc">Manage brands from <code>/dashboard/brand</code>. All brands are displayed with Name, Description, and Image. Data is fetched from <code>GET /api/brands</code>.</p>
+
+    <div class="sub-title">Adding a New Brand</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-content"><h4>Navigate to Brands</h4><p>Click <strong>Brands</strong> in the sidebar.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Fill in the form</h4>
+        <table class="doc-table" style="margin-top:10px;">
+          <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+          <tr><td>Name</td><td><span class="required">required</span></td><td>—</td></tr>
+          <tr><td>Description</td><td><span class="optional">optional</span></td><td>Short description of the brand</td></tr>
+          <tr><td>Image</td><td><span class="optional">optional</span></td><td>File input with preview</td></tr>
+        </table>
+      </div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Submit</h4><p>A <code>FormData</code> payload is sent to <code>POST /api/brands</code> with the admin token. The image is uploaded to Cloudinary under <code>navzabd/brands</code>. On success, a toast and list refresh confirm the action.</p></div></div>
+    </div>
+    <div class="card" style="margin-top:16px;"><h4>✏️ Edit / 🗑️ Delete</h4><p><strong>Edit:</strong> Actions → Edit → update fields → <code>PUT /api/brands/:id</code><br><strong>Delete:</strong> Confirm deletion → <code>DELETE /api/brands/:id</code></p></div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div class="section" id="categories">
+    <div class="section-title">Category Management</div>
+    <p class="section-desc">Manage categories from <code>/dashboard/categories</code>. The table shows Name, Category Type, Description, and Image. Data is fetched from <code>GET /api/categories</code>.</p>
+
+    <div class="sub-title">Adding a New Category</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-content"><h4>Navigate to Categories</h4><p>Click <strong>Categories</strong> in the sidebar.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Fill in the form</h4>
+        <table class="doc-table" style="margin-top:10px;">
+          <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+          <tr><td>Name</td><td><span class="required">required</span></td><td>—</td></tr>
+          <tr><td>Category Type</td><td><span class="required">required</span></td><td><code>Featured</code>, <code>Hot Categories</code>, or <code>Top Categories</code></td></tr>
+          <tr><td>Description</td><td><span class="optional">optional</span></td><td>—</td></tr>
+          <tr><td>Image</td><td><span class="optional">optional</span></td><td>File input with preview</td></tr>
+        </table>
+      </div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Submit</h4><p>Sends a <code>FormData</code> payload to <code>POST /api/categories</code>. Image uploads to Cloudinary under <code>navzabd/categories</code>. On success, a toast and refresh confirm the action.</p></div></div>
+    </div>
+    <div class="card" style="margin-top:16px;"><h4>✏️ Edit / 🗑️ Delete</h4><p><strong>Edit:</strong> Edit modal → update name, description, categoryType, or image → <code>PUT /api/categories/:id</code><br><strong>Delete:</strong> Confirm → <code>DELETE /api/categories/:id</code></p></div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="section" id="orders">
+    <div class="section-title">Orders & Invoices</div>
+
+    <div class="sub-title">Orders Management · <code style="font-size:13px;font-family:var(--mono);color:var(--text-dim)">/dashboard/order</code></div>
+    <p class="section-desc">Fetches all orders via <code>GET /api/orders</code> (admin sees all) and stats via <code>GET /api/stats</code>. The table displays Order ID, Customer, Items Summary, Amount, Payment Status, and Fulfillment Status.</p>
+
+    <div class="sub-title">Updating Fulfillment Status</div>
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:12px;">Select a new status from the dropdown in any order row. This calls <code>PUT /api/orders/:id/fulfillment</code> and refreshes the data on success.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+      <span class="status pending">pending</span>
+      <span class="status processing">processing</span>
+      <span class="status shipped">shipped</span>
+      <span class="status delivered">delivered</span>
+    </div>
+
+    <div class="sub-title">Invoice Section · <code style="font-size:13px;font-family:var(--mono);color:var(--text-dim)">/dashboard/invoices</code></div>
+    <p class="section-desc">Invoice data is pulled from <code>GET /api/orders</code>. Each row shows Order ID, Customer Name, Date, Total Amount, and Payment Status.</p>
+    <div class="card">
+      <h4>📥 PDF Download</h4>
+      <p>Each row has a <strong>Download</strong> button. Clicking it generates a PDF client-side using <strong>jsPDF</strong> containing:<br><br>
+      — Header: NavzaBD Invoice<br>
+      — Fields: Order ID, Customer name, Date<br>
+      — Items table: Product name, Quantity, Line total<br>
+      — Footer: Grand total and payment status<br><br>
+      A <code>"Invoice downloaded."</code> Sonner toast confirms the action. All tables use <code>overflow-x-auto</code> for mobile compatibility.</p>
+    </div>
+  </div>
+
+  <!-- ACCOUNT -->
+  <div class="section" id="account">
+    <div class="section-title">Account Management</div>
+    <p class="section-desc">Manage your admin profile and saved addresses from <code>/dashboard/account</code>.</p>
+    <table class="doc-table">
+      <tr><th>Feature</th><th>API</th><th>Description</th></tr>
+      <tr><td>View profile</td><td><code>GET /api/auth/profile</code></td><td>Fetches current admin's name, email, and avatar</td></tr>
+      <tr><td>Update profile</td><td><code>PUT /api/users/:id</code></td><td>Update name, email, or avatar URL</td></tr>
+      <tr><td>Add address</td><td><code>POST /api/users/:id/addresses</code></td><td>Fields: street, city, country, postalCode, isDefault</td></tr>
+      <tr><td>Edit address</td><td><code>PUT /api/users/:id/addresses/:addressId</code></td><td>Update any address field</td></tr>
+      <tr><td>Delete address</td><td><code>DELETE /api/users/:id/addresses/:addressId</code></td><td>Remove a saved address</td></tr>
+    </table>
+    <div class="callout">All actions are confirmed with Sonner toast notifications.</div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="section" id="setup">
+    <div class="section-title">Running Locally</div>
+    <p class="section-desc">Project root: <code>/home/ra-one/website/Complete NavzaBD Baby Shop</code></p>
+
+    <div class="sub-title">Step 1 — Start the Backend</div>
+    <div class="code-title"><span class="lang">bash</span><span>server/</span></div>
+    <div class="code-block">cd "server"
+npm install
+npm run dev   <span class="comment"># runs on port 8000</span></div>
+
+    <div class="sub-title">server/.env</div>
+    <div class="code-block"><span class="key">PORT</span>=<span class="str">8000</span>
+<span class="key">MONGO_URI</span>=<span class="str">your_mongodb_uri</span>
+<span class="key">JWT_SECRET</span>=<span class="str">your_jwt_secret</span>
+
+<span class="key">STRIPE_SECRET_KEY</span>=<span class="str">your_stripe_secret_key</span>
+<span class="key">STRIPE_WEBHOOK_SECRET</span>=<span class="str">your_stripe_webhook_secret</span>
+<span class="key">PUBLISHABLE_KEY</span>=<span class="str">your_stripe_publishable_key</span>
+<span class="key">STRIPE_CURRENCY</span>=<span class="str">usd</span>
+
+<span class="key">CLOUDINARY_CLOUD_NAME</span>=<span class="str">your_cloudinary_cloud_name</span>
+<span class="key">CLOUDINARY_API_KEY</span>=<span class="str">your_cloudinary_api_key</span>
+<span class="key">CLOUDINARY_API_SECRET</span>=<span class="str">your_cloudinary_api_secret</span>
+
+<span class="key">ADMIN_URL</span>=<span class="str">http://localhost:5173</span>
+<span class="key">CLIENT_URL</span>=<span class="str">http://localhost:3000</span>
+<span class="key">PRODUCTION_SERVER_URL</span>=</div>
+
+    <div class="sub-title">Step 2 — Start the Admin Panel</div>
+    <div class="code-title"><span class="lang">bash</span><span>admin/</span></div>
+    <div class="code-block">cd "admin"
+npm install
+npm run dev   <span class="comment"># runs on http://localhost:5173</span></div>
+
+    <div class="sub-title">admin/.env</div>
+    <div class="code-block"><span class="key">VITE_API_URL</span>=<span class="str">http://localhost:8000</span></div>
+    <div class="callout">This tells the Axios client to route all <code>/api/...</code> calls to the backend server at port 8000.</div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="section" id="checklist">
+    <div class="section-title">Quick Start Checklist</div>
+    <p class="section-desc">Complete these steps in order before managing the store.</p>
+    <div class="checklist">
+      <div class="checklist-item"><span class="num">01</span><p>Configure <strong>server/.env</strong> with your MongoDB, Stripe, and Cloudinary credentials</p></div>
+      <div class="checklist-item"><span class="num">02</span><p>Run <code>npm run dev</code> in the <strong>server</strong> directory and confirm it starts on port 8000</p></div>
+      <div class="checklist-item"><span class="num">03</span><p>Set <strong>VITE_API_URL</strong> in <code>admin/.env</code></p></div>
+      <div class="checklist-item"><span class="num">04</span><p>Run <code>npm run dev</code> in the <strong>admin</strong> directory</p></div>
+      <div class="checklist-item"><span class="num">05</span><p>Create at least one user in MongoDB with <code>role: "admin"</code></p></div>
+      <div class="checklist-item"><span class="num">06</span><p>Log in at <strong>http://localhost:5173/login</strong></p></div>
+      <div class="checklist-item"><span class="num">07</span><p>Create <strong>Categories</strong> first, then <strong>Brands</strong>, then <strong>Products</strong></p></div>
+      <div class="checklist-item"><span class="num">08</span><p>Monitor orders from the Orders section and download PDF invoices from Invoices</p></div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('.nav-link');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 60) current = s.id; });
+    navLinks.forEach(l => { l.classList.remove('active'); if (l.getAttribute('href') === '#' + current) l.classList.add('active'); });
+  });
+</script>
+</body>
+</html>

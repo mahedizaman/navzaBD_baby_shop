@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NavzaBD Client App Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #111318; --surface2: #181c24; --border: #1e2430;
+    --accent: #4f8ef7; --green: #22c55e; --yellow: #f59e0b; --red: #ef4444;
+    --cyan: #06b6d4; --purple: #7c3aed; --orange: #f97316;
+    --text: #e2e8f0; --text-muted: #64748b; --text-dim: #94a3b8;
+    --mono: 'JetBrains Mono', monospace; --sans: 'Inter', sans-serif; --display: 'Syne', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; display: flex; min-height: 100vh; }
+
+  .sidebar { width: 260px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; overflow-y: auto; padding-bottom: 40px; z-index: 100; }
+  .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h1 { font-family: var(--display); font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+  .sidebar-logo span { font-family: var(--mono); font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px; }
+  .nav-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); padding: 14px 20px 4px; font-weight: 600; }
+  .nav-link { display: block; padding: 7px 20px; color: var(--text-dim); text-decoration: none; font-size: 13px; transition: all 0.15s; border-left: 2px solid transparent; cursor: pointer; }
+  .nav-link:hover, .nav-link.active { color: var(--text); background: rgba(79,142,247,0.06); border-left-color: var(--accent); }
+
+  .main { margin-left: 260px; flex: 1; padding: 0 48px 80px; max-width: calc(100vw - 260px); }
+  .page-header { padding: 48px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+  .page-header h1 { font-family: var(--display); font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+  .page-header h1 span { color: var(--accent); }
+  .page-header p { margin-top: 10px; color: var(--text-dim); font-size: 15px; max-width: 560px; line-height: 1.7; }
+  .badge-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; font-family: var(--mono); }
+  .badge.next { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+  .badge.ts { background: rgba(79,142,247,0.1); color: var(--accent); }
+  .badge.stripe { background: rgba(124,58,237,0.1); color: var(--purple); }
+  .badge.zustand { background: rgba(245,158,11,0.1); color: var(--yellow); }
+  .badge.tailwind { background: rgba(34,197,94,0.1); color: var(--green); }
+
+  .section { margin-bottom: 60px; scroll-margin-top: 24px; }
+  .section-title { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .section-desc { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; line-height: 1.75; max-width: 700px; margin-top: 10px; }
+  .sub-title { font-family: var(--display); font-size: 16px; font-weight: 700; margin: 28px 0 10px; color: var(--text); }
+
+  .doc-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 14px 0; }
+  .doc-table th { text-align: left; padding: 9px 14px; background: var(--surface2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  .doc-table th:first-child { border-radius: 6px 0 0 0; }
+  .doc-table th:last-child { border-radius: 0 6px 0 0; }
+  .doc-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-dim); vertical-align: top; line-height: 1.55; }
+  .doc-table tr:last-child td { border-bottom: none; }
+  .doc-table td:first-child { color: var(--text); font-weight: 500; }
+  .doc-table code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 3px; color: var(--cyan); }
+  .required { font-size: 10px; background: rgba(239,68,68,0.1); color: var(--red); padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+
+  .code-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 18px; font-family: var(--mono); font-size: 12px; line-height: 1.75; overflow-x: auto; color: #a9b4c9; margin: 12px 0; }
+  .code-block .key { color: #7dd3fc; }
+  .code-block .str { color: #86efac; }
+  .code-block .comment { color: var(--text-muted); font-style: italic; }
+  .code-block .arrow { color: var(--accent); }
+  .code-block .step-lbl { color: var(--yellow); font-weight: 600; }
+  .code-title span { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+  .code-title .lang { font-size: 10px; background: var(--surface2); color: var(--text-muted); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+  .code-title { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; margin-bottom: 12px; }
+  .card h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .card p { color: var(--text-dim); font-size: 13px; line-height: 1.65; }
+  .card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 3px; color: var(--cyan); }
+
+  .callout { background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.2); border-left: 3px solid var(--accent); border-radius: 6px; padding: 14px 16px; margin: 16px 0; font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+  .callout strong { color: var(--text); }
+  .warning { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2); border-left: 3px solid var(--yellow); border-radius: 6px; padding: 14px 16px; margin: 16px 0; font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+  .warning strong { color: var(--yellow); }
+
+  .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+  .tech-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .tech-card h4 { font-family: var(--mono); font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .tech-card p { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
+
+  .flow-step { display: flex; gap: 0; flex-direction: column; }
+  .flow-item { display: flex; gap: 16px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); position: relative; }
+  .flow-item:first-child { border-radius: 8px 8px 0 0; }
+  .flow-item:last-child { border-radius: 0 0 8px 8px; border-top: none; }
+  .flow-item:not(:first-child):not(:last-child) { border-top: none; }
+  .flow-dot { width: 28px; height: 28px; border-radius: 50%; background: rgba(79,142,247,0.12); color: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+  .flow-content h4 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .flow-content p { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .flow-content code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 3px; color: var(--cyan); }
+
+  .checklist { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .checklist-item .num { font-family: var(--mono); font-size: 11px; color: var(--green); background: rgba(34,197,94,0.1); padding: 2px 7px; border-radius: 4px; white-space: nowrap; margin-top: 1px; }
+  .checklist-item p { color: var(--text-dim); font-size: 13px; line-height: 1.6; }
+  .checklist-item p strong { color: var(--text); }
+
+  .struct-tree { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 18px; font-family: var(--mono); font-size: 12px; line-height: 2; color: #a9b4c9; }
+  .struct-tree .dir { color: var(--accent); }
+  .struct-tree .file { color: var(--text-dim); }
+  .struct-tree .note { color: var(--text-muted); font-style: italic; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NavzaBD Client</h1>
+    <span>Storefront App Guide</span>
+  </div>
+  <div class="nav-label">Overview</div>
+  <a class="nav-link" href="#tech">Tech Stack</a>
+  <a class="nav-link" href="#features">Core Features</a>
+  <div class="nav-label">Payment</div>
+  <a class="nav-link" href="#checkout">Checkout & Payment</a>
+  <a class="nav-link" href="#flow">Payment Flow</a>
+  <div class="nav-label">Project</div>
+  <a class="nav-link" href="#structure">Project Structure</a>
+  <a class="nav-link" href="#setup">Running Locally</a>
+  <a class="nav-link" href="#checklist">Test Checklist</a>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Client App <span>Guide</span></h1>
+    <p>Complete reference for the NavzaBD storefront — features, payment flow, project structure, and local setup.</p>
+    <div class="badge-row">
+      <span class="badge next">Next.js 16</span>
+      <span class="badge ts">TypeScript</span>
+      <span class="badge tailwind">Tailwind CSS v4</span>
+      <span class="badge stripe">Stripe</span>
+      <span class="badge zustand">Zustand</span>
+    </div>
+  </div>
+
+  <!-- TECH -->
+  <div class="section" id="tech">
+    <div class="section-title">Tech Stack</div>
+    <div class="tech-grid">
+      <div class="tech-card"><h4>Next.js 16 (App Router)</h4><p>SEO-friendly React app with server-side rendering and file-based routing.</p></div>
+      <div class="tech-card"><h4>TypeScript</h4><p>Type safety across all components, services, and store files.</p></div>
+      <div class="tech-card"><h4>Tailwind CSS v4</h4><p>Modern utility-first CSS for responsive and consistent UI design.</p></div>
+      <div class="tech-card"><h4>Axios</h4><p>HTTP client used in all service layer functions for API calls.</p></div>
+      <div class="tech-card"><h4>Stripe Checkout</h4><p>Redirect-based hosted payment page for online order processing.</p></div>
+      <div class="tech-card"><h4>Zustand</h4><p>Lightweight global state management for cart and wishlist data.</p></div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section" id="features">
+    <div class="section-title">Core Features</div>
+
+    <div class="sub-title">Home Page · <code style="font-size:13px;font-family:var(--mono);color:var(--text-dim)">/</code></div>
+    <p class="section-desc">Displays a hero slider, promotional banners, featured products, trust badges, and testimonials. All content is dynamically rendered from backend data — categories, brands, and products.</p>
+
+    <div class="sub-title">Product Listing & Filtering · <code style="font-size:13px;font-family:var(--mono);color:var(--text-dim)">/products</code></div>
+    <table class="doc-table">
+      <tr><th>Feature</th><th>Details</th></tr>
+      <tr><td>Pagination</td><td>Navigate through large product sets page by page</td></tr>
+      <tr><td>Sorting</td><td>Sort by price or <code>createdAt</code> date, ascending or descending</td></tr>
+      <tr><td>Search</td><td>Keyword search across product names and descriptions</td></tr>
+      <tr><td>Category filter</td><td>Filter results by a specific category</td></tr>
+      <tr><td>Brand filter</td><td>Filter results by a specific brand</td></tr>
+      <tr><td>Price range</td><td>Filter by minimum and maximum price</td></tr>
+    </table>
+    <div class="code-block">GET /api/products?page=1&limit=12&sortOrder=asc&category=...&brand=...&priceMin=5&priceMax=50&search=chips</div>
+
+    <div class="sub-title">Product Detail Page · <code style="font-size:13px;font-family:var(--mono);color:var(--text-dim)">/products/[id]</code></div>
+    <p class="section-desc">Displays the full product information: name, image, description, price, discount, stock availability, and ratings.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div class="card" style="flex:1;min-width:200px;"><h4>🛒 Add to Cart</h4><p>Adds the item to the <code>useCartStore</code> Zustand store. Updates cart count instantly.</p></div>
+      <div class="card" style="flex:1;min-width:200px;"><h4>❤️ Wishlist</h4><p>Add or remove the product from the <code>useWishlistStore</code> (if enabled on the frontend).</p></div>
+    </div>
+
+    <div class="sub-title">Cart · <code style="font-size:13px;font-family:var(--mono);color:var(--text-dim)">/cart</code></div>
+    <table class="doc-table">
+      <tr><th>Feature</th><th>Details</th></tr>
+      <tr><td>Item summary</td><td>Name, image, quantity, and line total for each cart item</td></tr>
+      <tr><td>Quantity controls</td><td>Increment and decrement buttons per item</td></tr>
+      <tr><td>Remove item</td><td>Remove a single product from the cart</td></tr>
+      <tr><td>Clear cart</td><td>Remove all items at once</td></tr>
+    </table>
+    <div class="callout">Cart state is managed client-side with <strong>Zustand</strong> (<code>useCartStore</code>) and persisted in the browser. It can optionally be synced with the backend via <code>/api/cart</code> routes. Clicking <strong>Proceed to Checkout</strong> navigates to <code>/checkout</code>.</div>
+  </div>
+
+  <!-- CHECKOUT -->
+  <div class="section" id="checkout">
+    <div class="section-title">Checkout & Payment</div>
+    <p class="section-desc">Route: <code>/checkout</code> · Component: <code>client/app/checkout/page.tsx</code></p>
+
+    <div class="sub-title">Required Fields</div>
+    <p style="color:var(--text-dim);font-size:13px;margin-bottom:12px;">Before payment can be initiated, all four shipping address fields must be filled in.</p>
+    <table class="doc-table">
+      <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+      <tr><td><code>street</code></td><td><span class="required">required</span></td><td>Street address line</td></tr>
+      <tr><td><code>city</code></td><td><span class="required">required</span></td><td>City name</td></tr>
+      <tr><td><code>country</code></td><td><span class="required">required</span></td><td>Country name or code</td></tr>
+      <tr><td><code>postalCode</code></td><td><span class="required">required</span></td><td>ZIP or postal code</td></tr>
+    </table>
+    <div class="callout">If any field is missing when the user clicks <strong>Pay Now</strong>, a <code>toast.error("Please fill in all shipping address fields.")</code> is shown and the request is not sent. <br><br><strong>Note:</strong> Phone number is not currently required. It can be added to both the form and the API request body if needed.</div>
+
+    <div class="sub-title">Authentication</div>
+    <p class="section-desc">The checkout page reads a JWT token from <code>localStorage</code> using <code>getStoredAuthToken()</code> (keys: <code>token</code> or <code>navzabd_token</code>). If no token is found, a <code>toast.error</code> prompts the user to log in.</p>
+    <div class="warning"><strong>⚠️ Local testing only:</strong> You can temporarily bypass the token check by commenting out the <code>if (!token)</code> block in <code>checkout/page.tsx</code>. Never do this in production — the backend route <code>POST /api/payment/initiate</code> is protected and requires a valid JWT.</div>
+  </div>
+
+  <!-- FLOW -->
+  <div class="section" id="flow">
+    <div class="section-title">Payment Flow</div>
+    <p class="section-desc">Step-by-step breakdown of what happens when the user clicks <strong>Pay Now</strong>.</p>
+    <div class="flow-step">
+      <div class="flow-item"><div class="flow-dot">1</div><div class="flow-content"><h4>User fills in shipping details and clicks Pay Now</h4><p><code>handlePayNow()</code> builds the request body: <code>amount</code> (cart total), <code>items</code> (array of <code>{ productId, name, price, qty, image }</code>), and <code>shippingAddress</code>.</p></div></div>
+      <div class="flow-item"><div class="flow-dot">2</div><div class="flow-content"><h4>Frontend sends request to backend</h4><p>Calls <code>POST /api/payment/initiate</code> with the JWT token via <code>initiatePayment(body, token)</code> from the services layer.</p></div></div>
+      <div class="flow-item"><div class="flow-dot">3</div><div class="flow-content"><h4>Backend processes the request</h4><p>Validates amount and stock availability → creates an Order document with <code>status: pending</code> → creates a Stripe Checkout Session → returns <code>{ url, sessionId, orderId }</code>.</p></div></div>
+      <div class="flow-item"><div class="flow-dot">4</div><div class="flow-content"><h4>Frontend redirects to Stripe</h4><p><code>window.location.href = url</code> — the user is sent to the Stripe hosted checkout page to complete payment.</p></div></div>
+      <div class="flow-item"><div class="flow-dot">5</div><div class="flow-content"><h4>Stripe redirects back</h4><p><strong>Success:</strong> <code>/payment/success?session_id=...</code><br><strong>Failure / Cancel:</strong> <code>/payment/fail</code></p></div></div>
+      <div class="flow-item"><div class="flow-dot">6</div><div class="flow-content"><h4>Optional: Verify payment</h4><p>The success page can call <code>GET /api/payment/verify?session_id=...</code> to confirm the order was marked as paid in the database.</p></div></div>
+    </div>
+  </div>
+
+  <!-- STRUCTURE -->
+  <div class="section" id="structure">
+    <div class="section-title">Project Structure</div>
+    <div class="struct-tree">
+<span class="dir">client/</span>
+├── <span class="dir">app/</span>
+│   ├── <span class="file">page.tsx</span>                        <span class="note"># Home page</span>
+│   ├── <span class="dir">products/</span>
+│   │   ├── <span class="file">page.tsx</span>                    <span class="note"># Product listing & filtering</span>
+│   │   └── <span class="dir">[id]/</span>
+│   │       └── <span class="file">page.tsx</span>               <span class="note"># Single product detail</span>
+│   ├── <span class="dir">cart/</span>
+│   │   └── <span class="file">page.tsx</span>                   <span class="note"># Cart page (Zustand store)</span>
+│   ├── <span class="dir">checkout/</span>
+│   │   └── <span class="file">page.tsx</span>                   <span class="note"># Checkout form + Pay Now logic</span>
+│   └── <span class="dir">payment/</span>
+│       ├── <span class="dir">success/</span>
+│       │   └── <span class="file">page.tsx</span>               <span class="note"># Payment success page</span>
+│       └── <span class="dir">fail/</span>
+│           └── <span class="file">page.tsx</span>               <span class="note"># Payment failure/cancel page</span>
+├── <span class="dir">services/</span>                          <span class="note"># API client functions</span>
+│   ├── <span class="file">products.ts</span>
+│   ├── <span class="file">categories.ts</span>
+│   ├── <span class="file">brands.ts</span>
+│   └── <span class="file">payments.ts</span>
+└── <span class="dir">store/</span>
+    ├── <span class="file">useCartStore.ts</span>                <span class="note"># Zustand cart state</span>
+    └── <span class="file">useWishlistStore.ts</span>            <span class="note"># Zustand wishlist state</span></div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="section" id="setup">
+    <div class="section-title">Running Locally</div>
+    <p class="section-desc">Project root: <code>/home/ra-one/website/Complete NavzaBD Baby Shop</code></p>
+
+    <div class="sub-title">Step 1 — Start the Backend</div>
+    <div class="code-title"><span class="lang">bash</span><span>server/</span></div>
+    <div class="code-block">cd "server"
+npm install
+npm run dev   <span class="comment"># runs on port 8000</span></div>
+
+    <div class="sub-title">server/.env</div>
+    <div class="code-block"><span class="key">PORT</span>=<span class="str">8000</span>
+<span class="key">MONGO_URI</span>=<span class="str">your_mongodb_uri</span>
+<span class="key">JWT_SECRET</span>=<span class="str">your_jwt_secret</span>
+
+<span class="key">STRIPE_SECRET_KEY</span>=<span class="str">your_stripe_secret_key</span>
+<span class="key">STRIPE_WEBHOOK_SECRET</span>=<span class="str">your_stripe_webhook_secret</span>
+<span class="key">PUBLISHABLE_KEY</span>=<span class="str">your_stripe_publishable_key</span>
+<span class="key">STRIPE_CURRENCY</span>=<span class="str">usd</span>
+
+<span class="key">CLOUDINARY_CLOUD_NAME</span>=<span class="str">your_cloudinary_cloud_name</span>
+<span class="key">CLOUDINARY_API_KEY</span>=<span class="str">your_cloudinary_api_key</span>
+<span class="key">CLOUDINARY_API_SECRET</span>=<span class="str">your_cloudinary_api_secret</span>
+
+<span class="key">ADMIN_URL</span>=<span class="str">http://localhost:5173</span>
+<span class="key">CLIENT_URL</span>=<span class="str">http://localhost:3000</span>
+<span class="key">PRODUCTION_SERVER_URL</span>=</div>
+
+    <div class="sub-title">Step 2 — Start the Client App</div>
+    <div class="code-title"><span class="lang">bash</span><span>client/</span></div>
+    <div class="code-block">cd "client"
+npm install
+npm run dev   <span class="comment"># runs on http://localhost:3000</span></div>
+
+    <div class="sub-title">client/.env.local</div>
+    <div class="code-block"><span class="key">NEXT_PUBLIC_API_URL</span>=<span class="str">http://localhost:8000</span></div>
+    <div class="callout">This allows the Axios service layer to route all API calls to the correct backend URL. Configure your <code>services/api.ts</code> to read from <code>process.env.NEXT_PUBLIC_API_URL</code>.</div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="section" id="checklist">
+    <div class="section-title">Test Checklist</div>
+    <p class="section-desc">Use this checklist to verify the app is working correctly after setup.</p>
+    <div class="checklist">
+      <div class="checklist-item"><span class="num">01</span><p>Backend is running on port <strong>8000</strong> and client on port <strong>3000</strong></p></div>
+      <div class="checklist-item"><span class="num">02</span><p>Home page loads products and banners without errors in the browser console</p></div>
+      <div class="checklist-item"><span class="num">03</span><p>Products can be added to the cart from both the listing and detail pages</p></div>
+      <div class="checklist-item"><span class="num">04</span><p><code>/cart</code> shows correct item names, quantities, and calculated total price</p></div>
+      <div class="checklist-item"><span class="num">05</span><p>Clicking <strong>Pay Now</strong> on <code>/checkout</code> without filling in shipping fields shows a validation toast error</p></div>
+      <div class="checklist-item"><span class="num">06</span><p>Filling in valid shipping details and clicking <strong>Pay Now</strong> redirects to the Stripe Checkout page</p></div>
+      <div class="checklist-item"><span class="num">07</span><p>Using a Stripe test card completes the payment and lands on <code>/payment/success</code></p></div>
+      <div class="checklist-item"><span class="num">08</span><p>The completed order appears in the admin panel with <code>paid</code> status</p></div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('.nav-link');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 60) current = s.id; });
+    navLinks.forEach(l => { l.classList.remove('active'); if (l.getAttribute('href') === '#' + current) l.classList.add('active'); });
+  });
+</script>
+</body>
+</html>
