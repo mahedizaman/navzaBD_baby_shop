@@ -1,4 +1,18 @@
 const Category = require("../models/categoryModel");
+const cloudinary = require("../config/cloudinary.js");
+
+function uploadBufferToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "navzabd/categories" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      },
+    );
+    stream.end(buffer);
+  });
+}
 
 function getServerBaseUrl(req) {
   const envBase = process.env.SERVER_BASE_URL || process.env.BASE_URL;
@@ -58,6 +72,42 @@ exports.getCategoryById = async (req, res, next) => {
 
 exports.createCategory = async (req, res, next) => {
   try {
+    // Multipart (FormData) with a single image file
+    if (req.file) {
+      const { name, description, categoryType, image, imgUrl, imageUrl } =
+        req.body || {};
+      if (!name) {
+        res.status(400);
+        throw new Error('Missing "name"');
+      }
+      if (!categoryType) {
+        res.status(400);
+        throw new Error('Missing "categoryType"');
+      }
+
+      const uploaded = await uploadBufferToCloudinary(req.file.buffer);
+      const payload = {
+        name,
+        description,
+        image: uploaded.secure_url,
+        categoryType,
+      };
+
+      const existing = await Category.findOne({ name: payload.name }).select(
+        "name",
+      );
+      if (existing) {
+        res.status(400);
+        throw new Error(
+          `Category with this name already exists: ${existing.name}`,
+        );
+      }
+
+      const createdCategory = await Category.create(payload);
+      return res.status(201).json(normalizeCategory(createdCategory, req));
+    }
+
+    // JSON single/bulk payload
     const body = req.body;
     const isBulk = Array.isArray(body);
     const items = isBulk ? body : [body];
@@ -121,8 +171,21 @@ exports.updateCategory = async (req, res, next) => {
     if (category) {
       category.name = req.body.name || category.name;
       category.description = req.body.description || category.description;
-      category.image =
-        req.body.image || req.body.imgUrl || req.body.imageUrl || category.image;
+      if (req.file) {
+        const uploadedImageUrl = (
+          await uploadBufferToCloudinary(req.file.buffer)
+        ).secure_url;
+        category.image = uploadedImageUrl;
+      } else {
+        category.image =
+          req.body.image ||
+          req.body.imgUrl ||
+          req.body.imageUrl ||
+          category.image;
+      }
+      if (req.body.categoryType) {
+        category.categoryType = req.body.categoryType;
+      }
       const updatedCategory = await category.save();
       res.status(200).json(normalizeCategory(updatedCategory, req));
     } else {

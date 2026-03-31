@@ -10,6 +10,7 @@ const {
 } = require("../controllers/brandController");
 
 const { protect, admin } = require("../middleware/authMiddleware");
+const { optionalSingle } = require("../middleware/uploadMiddleware");
 
 /**
  * @swagger
@@ -110,7 +111,7 @@ const { protect, admin } = require("../middleware/authMiddleware");
  *               $ref: '#/components/schemas/Error'
  */
 
-router.route("/").get(getBrands).post(protect, admin, createBrand);
+router.route("/").get(getBrands).post(protect, admin, optionalSingle("image"), createBrand);
 
 /**
  * @swagger
@@ -186,7 +187,7 @@ router.route("/").get(getBrands).post(protect, admin, createBrand);
 router
   .route("/:id")
   .get(getBrandById)
-  .put(protect, admin, updateBrand)
+  .put(protect, admin, optionalSingle("image"), updateBrand)
   .delete(protect, admin, deleteBrand);
 
 module.exports = router;

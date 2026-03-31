@@ -25,7 +25,7 @@ exports.registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        address: user.address || [],
+        address: user.addresses || [],
         createdAt: user.createdAt,
       });
 
@@ -72,7 +72,8 @@ exports.loginUser = async (req, res) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
-        address: user.address || [],
+        addresses: user.addresses || [],
+        address: user.addresses || [],
       },
     });
   } catch (error) {
@@ -93,7 +94,8 @@ exports.getUserProfile = async (req, res) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
-        address: user.address || [],
+        addresses: user.addresses || [],
+        address: user.addresses || [],
       });
     } else {
       return res.status(404).json({ message: "No users found" });

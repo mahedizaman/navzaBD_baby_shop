@@ -23,8 +23,10 @@ type Category = { _id: string; name: string };
 type Brand = { _id: string; name: string };
 
 function refLabel(ref: ProductRow["category"]): string {
-  if (ref && typeof ref === "object" && "name" in ref) return ref.name;
-  return String(ref || "—");
+  if (!ref) return "—";
+  if (typeof ref === "string") return ref || "—";
+  // Backend populate might still return unexpected values; never assume `name` exists.
+  return (ref as { name?: string } | undefined)?.name ?? "—";
 }
 
 const Product = () => {
@@ -326,11 +328,13 @@ const Product = () => {
               onChange={(e) => setCategoryId(e.target.value)}
             >
               <option value="">Select category</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
+              {categories
+                .filter((c): c is Category => Boolean(c && c._id))
+                .map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c?.name ?? "—"}
+                  </option>
+                ))}
             </select>
           </div>
           <div>
@@ -341,11 +345,13 @@ const Product = () => {
               onChange={(e) => setBrandId(e.target.value)}
             >
               <option value="">Select brand</option>
-              {brands.map((b) => (
-                <option key={b._id} value={b._id}>
-                  {b.name}
-                </option>
-              ))}
+              {brands
+                .filter((b): b is Brand => Boolean(b && b._id))
+                .map((b) => (
+                  <option key={b._id} value={b._id}>
+                    {b?.name ?? "—"}
+                  </option>
+                ))}
             </select>
           </div>
           <div className="md:col-span-2">

@@ -77,9 +77,11 @@ const Sidebar = ({ isOpen, setOpen }: SidebarProps) => {
   return (
     <div
       className={cn(
-        "fixed inset-y-0 left-0 z-20 flex flex-col border-r border-white/10 shadow-xl transition-all duration-500 ease-in-out",
+        "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-white/10 shadow-xl transform transition-all duration-300 ease-in-out",
         "bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900 text-white",
-        isOpen ? "w-64" : "w-20",
+        isOpen
+          ? "translate-x-0 w-64 lg:w-64"
+          : "-translate-x-full lg:translate-x-0 w-20 lg:w-20",
       )}
     >
       <div
@@ -125,6 +127,11 @@ const Sidebar = ({ isOpen, setOpen }: SidebarProps) => {
             <Link
               key={index}
               to={item.path}
+              onClick={() => {
+                if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                  setOpen(false);
+                }
+              }}
               className={cn(
                 "flex items-center p-3 rounded-xl transition-all duration-300 group",
                 isOpen ? "gap-3" : "justify-center",

@@ -10,6 +10,7 @@ const {
 } = require("../controllers/categoryController.js");
 
 const { protect, admin } = require("../middleware/authMiddleware.js");
+const { optionalSingle } = require("../middleware/uploadMiddleware.js");
 
 
 /**
@@ -114,7 +115,7 @@ const { protect, admin } = require("../middleware/authMiddleware.js");
  *       403:
  *         description: Admin access required
  */
-router.route("/").get(getCategories).post(protect, admin, createCategory);
+router.route("/").get(getCategories).post(protect, admin, optionalSingle("image"), createCategory);
 
 /**
  * @swagger
@@ -207,7 +208,7 @@ router.route("/").get(getCategories).post(protect, admin, createCategory);
 router
   .route("/:id")
   .get(getCategoryById)
-  .put(protect, admin, updateCategory)
+  .put(protect, admin, optionalSingle("image"), updateCategory)
   .delete(protect, admin, deleteCategory);
 
 

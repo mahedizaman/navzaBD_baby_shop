@@ -1,4 +1,18 @@
 const Brand = require("../models/brandModel");
+const cloudinary = require("../config/cloudinary.js");
+
+function uploadBufferToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "navzabd/brands" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      },
+    );
+    stream.end(buffer);
+  });
+}
 
 exports.getBrands = async (req, res, next) => {
   try {
@@ -24,6 +38,31 @@ exports.getBrandById = async (req, res, next) => {
 
 exports.createBrand = async (req, res, next) => {
   try {
+    // Multipart (FormData) with a single image file
+    if (req.file) {
+      const { name, title, description } = req.body || {};
+      if (!name) {
+        res.status(400);
+        throw new Error('Missing "name"');
+      }
+      const uploaded = await uploadBufferToCloudinary(req.file.buffer);
+      const payload = {
+        name,
+        description: description ?? title ?? "",
+        image: uploaded.secure_url,
+      };
+
+      const existing = await Brand.findOne({ name: payload.name }).select("name");
+      if (existing) {
+        res.status(400);
+        throw new Error(`Brand with this name already exists: ${existing.name}`);
+      }
+
+      const createdBrand = await Brand.create(payload);
+      return res.status(201).json(createdBrand);
+    }
+
+    // JSON single/bulk payload
     const body = req.body;
     const isBulk = Array.isArray(body);
     const items = isBulk ? body : [body];
@@ -78,9 +117,23 @@ exports.updateBrand = async (req, res, next) => {
   try {
     const brand = await Brand.findById(req.params.id);
     if (brand) {
-      brand.name = req.body.name || brand.name;
-      brand.title = req.body.title || brand.title;
-      brand.image = req.body.image || brand.image;
+      if (req.body?.name) brand.name = req.body.name;
+      if (req.body?.description) brand.description = req.body.description;
+
+      if (req.file) {
+        const uploadedImageUrl = (
+          await uploadBufferToCloudinary(req.file.buffer)
+        ).secure_url;
+        brand.image = uploadedImageUrl;
+      } else if (req.body?.image !== undefined) {
+        brand.image = req.body.image || brand.image;
+      }
+
+      // Backward compatibility: accept `title` as description.
+      if (req.body?.title && !req.body?.description) {
+        brand.description = req.body.title;
+      }
+
       const updatedBrand = await brand.save();
       res.status(200).json(updatedBrand);
     } else {
